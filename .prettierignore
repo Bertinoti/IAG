@@ -1,0 +1,10 @@
+node_modules
+.next
+.turbo
+.storybook-home
+**/storybook-static
+**/test-results
+coverage
+*.db
+*.sqlite
+*.sqlite3

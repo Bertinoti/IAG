@@ -15,7 +15,38 @@ FastAPI routes depend on application/provider boundaries; SQLAlchemy and AI adap
 
 ## Run locally
 
-Copy the relevant `.env.example` files to `.env`, then run `pnpm install` and `pnpm dev`. Web is on port 3000 and API on port 8000. The default seeded admin is `admin@example.com` / `ChangeMe123!`; override it through environment variables.
+Requirements: Node.js 22 or later and npm. Verify them in PowerShell:
+
+```powershell
+node --version
+npm --version
+```
+
+Install the pinned pnpm version globally and verify it:
+
+```powershell
+npm install --global pnpm@9.15.0
+pnpm --version
+```
+
+If `pnpm` is still not recognized, close and reopen PowerShell so the updated PATH is loaded. As an alternative, activate pnpm through Corepack:
+
+```powershell
+corepack enable
+corepack prepare pnpm@9.15.0 --activate
+pnpm --version
+```
+
+Copy the relevant `.env.example` files to `.env` and verify the templates before installing dependencies:
+
+```powershell
+Test-Path .env.example
+Test-Path apps/api/.env.example
+Test-Path apps/web/.env.example
+pnpm install
+```
+
+Start the development services with `pnpm dev`. Web is on port 3000 and API on port 8000. The default seeded admin is `admin@example.com` / `ChangeMe123!`; override it through environment variables.
 
 ## Docker
 
@@ -29,6 +60,10 @@ Login sets a signed HttpOnly, SameSite=Lax cookie containing an admin id and exp
 
 pytest covers health, auth, validation, and protected access. Cucumber-JS expresses business scenarios, Playwright runs browser journeys, and Storybook isolates shared components. Automated AI tests must inject a fake provider.
 
-Verified: Docker build/start, API health, web production build, web typecheck/lint, and pytest (5 passed). Cucumber, full Playwright journeys, and Storybook build remain scaffolding.
+Verified: Docker image build/start, API health, web production build, web typecheck/lint, pytest (7 passed), and Cucumber (4 scenarios, 13 steps passed). Full Playwright journeys and Storybook build remain scaffolding because the current Windows environment blocks Storybook child-process/file creation.
+
+Pull requests are checked by `.github/workflows/ci.yml`, which runs API compilation and pytest, workspace lint/typecheck/build, Cucumber, Storybook, Docker Compose validation/image builds, and Playwright browser journeys against the Docker services.
+
+The Prettier check currently reports pre-existing formatting differences in source and documentation files; generated Storybook, Playwright, and build artifacts are excluded through `.prettierignore`.
 
 AWS deployment, real airline integrations, RAG, queues, WebSockets, public registration, social login, password recovery, and email verification are outside V2. The local cookie has no server-side revocation store; cross-site deployment needs a new CSRF/CORS review.

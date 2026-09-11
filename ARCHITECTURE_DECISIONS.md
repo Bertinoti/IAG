@@ -38,21 +38,21 @@ This record resolves the decisions requested after discovery and is constrained 
 
 All schemas are JSON, versioned through the route contract, and exclude passwords, hashes, secrets, and internal stack traces.
 
-| Resource | Request schema | Response schema |
-|---|---|---|
-| Auth login | `{email: string, password: string}` | `{admin: {id, email, role}}`; session is set only in the cookie |
-| Auth logout | empty body | `{success: true}` |
-| Auth session | none | `{authenticated: boolean, admin?: {id, email, role}}` |
-| Agent configuration | `{context, guardrails, content, language: string}` | `{id, context, guardrails, content, language, created_at, updated_at}` |
-| Airline | none for create (seeded only) | `{id, name, code, created_at}`; list returns `{items: Airline[]}` |
-| Intent | none for create (seeded only) | `{id, name, created_at}`; list returns `{items: Intent[]}` |
-| Conversation create | `{airline_id: id, intent_id: id}` | `{id, airline, intent, started_at, updated_at, message_count, rating}` |
-| Conversation list | query `{page: positive int, page_size: bounded int, range/filter as approved}` | `{items: ConversationSummary[], page, page_size, total, pages}` |
-| Conversation detail | path `id` | `{conversation, messages: Message[], rating}` |
-| Message send | `{content: non-empty bounded string}` | `{user_message: Message, assistant_message: Message}` |
-| Message | none for separate creation | `{id, conversation_id, role, content, input_tokens?, output_tokens?, total_tokens?, estimated_cost?, created_at}` |
-| Rating | `{rating: "positive" | "negative"}` | `{id, conversation_id, rating, created_at}` |
-| Dashboard | query `range: "7d" | "30d" | "all"` | `{kpis, conversations_over_time, conversations_by_airline, intent_distribution, feedback_distribution}` |
+| Resource            | Request schema                                                                 | Response schema                                                                                                   |
+| ------------------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| Auth login          | `{email: string, password: string}`                                            | `{admin: {id, email, role}}`; session is set only in the cookie                                                   |
+| Auth logout         | empty body                                                                     | `{success: true}`                                                                                                 |
+| Auth session        | none                                                                           | `{authenticated: boolean, admin?: {id, email, role}}`                                                             |
+| Agent configuration | `{context, guardrails, content, language: string}`                             | `{id, context, guardrails, content, language, created_at, updated_at}`                                            |
+| Airline             | none for create (seeded only)                                                  | `{id, name, code, created_at}`; list returns `{items: Airline[]}`                                                 |
+| Intent              | none for create (seeded only)                                                  | `{id, name, created_at}`; list returns `{items: Intent[]}`                                                        |
+| Conversation create | `{airline_id: id, intent_id: id}`                                              | `{id, airline, intent, started_at, updated_at, message_count, rating}`                                            |
+| Conversation list   | query `{page: positive int, page_size: bounded int, range/filter as approved}` | `{items: ConversationSummary[], page, page_size, total, pages}`                                                   |
+| Conversation detail | path `id`                                                                      | `{conversation, messages: Message[], rating}`                                                                     |
+| Message send        | `{content: non-empty bounded string}`                                          | `{user_message: Message, assistant_message: Message}`                                                             |
+| Message             | none for separate creation                                                     | `{id, conversation_id, role, content, input_tokens?, output_tokens?, total_tokens?, estimated_cost?, created_at}` |
+| Rating              | `{rating: "positive"                                                           | "negative"}`                                                                                                      | `{id, conversation_id, rating, created_at}` |
+| Dashboard           | query `range: "7d"                                                             | "30d"                                                                                                             | "all"`                                      | `{kpis, conversations_over_time, conversations_by_airline, intent_distribution, feedback_distribution}` |
 
 `kpis` contains total conversations, total messages, average messages per conversation, positive-rating percentage, total tokens, and estimated AI cost. Chart arrays contain labeled aggregate points and return empty arrays plus zero-valued KPIs for a new installation. Exact timestamp serialization and identifier type follow the SQLAlchemy model convention selected during foundation work.
 

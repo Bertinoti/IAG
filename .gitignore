@@ -10,3 +10,9 @@ apps/api/.venv
 apps/api/__pycache__
 apps/api/*.db
 *.pyc
+*.tsbuildinfo
+.storybook-home
+storybook-static
+**/storybook-static
+test-results
+**/test-results

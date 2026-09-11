@@ -1,4 +1,143 @@
 "use client";
 import { useEffect, useState } from "react";
-const api=process.env.NEXT_PUBLIC_API_URL??"http://localhost:8000";
-export default function ChatPage(){const [airlines,setAirlines]=useState<any[]>([]),[intents,setIntents]=useState<any[]>([]),[airline,setAirline]=useState(""),[intent,setIntent]=useState(""),[conversation,setConversation]=useState<any>(null),[messages,setMessages]=useState<any[]>([]),[text,setText]=useState(""),[state,setState]=useState("Select an airline and intent to begin.");useEffect(()=>{Promise.all([fetch(`${api}/api/airlines`,{credentials:"include"}).then(r=>r.json()),fetch(`${api}/api/intents`,{credentials:"include"}).then(r=>r.json())]).then(([a,i])=>{setAirlines(a.items);setIntents(i.items);});},[]);async function start(){if(!airline||!intent)return;const r=await fetch(`${api}/api/conversations`,{method:"POST",credentials:"include",headers:{"Content-Type":"application/json"},body:JSON.stringify({airline_id:+airline,intent_id:+intent})});const c=await r.json();setConversation(c);setMessages([]);setState("Ready");}async function send(){if(!conversation||!text.trim())return;setState("Sending…");const r=await fetch(`${api}/api/conversations/${conversation.id}/messages`,{method:"POST",credentials:"include",headers:{"Content-Type":"application/json"},body:JSON.stringify({content:text})});const d=await r.json();setMessages(m=>[...m,d.user_message,d.assistant_message]);setText("");setState("Ready");}return <main className="mx-auto max-w-3xl p-8"><h1 className="text-3xl font-semibold">Airline chat</h1><div className="mt-6 grid gap-3 sm:grid-cols-2"><select value={airline} onChange={e=>setAirline(e.target.value)} className="rounded border p-2"><option value="">Choose airline</option>{airlines.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select><select value={intent} onChange={e=>setIntent(e.target.value)} className="rounded border p-2"><option value="">Choose intent</option>{intents.map(i=><option key={i.id} value={i.id}>{i.name}</option>)}</select></div><button onClick={start} className="mt-3 rounded bg-slate-900 px-4 py-2 text-white">Start conversation</button><p className="mt-3 text-sm text-slate-600">{state}</p><section className="mt-6 min-h-48 space-y-2 rounded border bg-white p-4">{messages.length?messages.map(m=><p key={m.id}><b>{m.role}:</b> {m.content}</p>):<p className="text-slate-500">No messages yet.</p>}</section><div className="mt-3 flex gap-2"><input disabled={!conversation} value={text} onChange={e=>setText(e.target.value)} className="flex-1 rounded border p-2" placeholder="Ask a question"/><button disabled={!conversation} onClick={send} className="rounded bg-slate-900 px-4 py-2 text-white">Send</button></div></main>}
+const api = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+export default function ChatPage() {
+  const [airlines, setAirlines] = useState<any[]>([]),
+    [intents, setIntents] = useState<any[]>([]),
+    [airline, setAirline] = useState(""),
+    [intent, setIntent] = useState(""),
+    [conversation, setConversation] = useState<any>(null),
+    [messages, setMessages] = useState<any[]>([]),
+    [text, setText] = useState(""),
+    [state, setState] = useState("Select an airline and intent to begin.");
+  useEffect(() => {
+    Promise.all([
+      fetch(`${api}/api/airlines`).then((r) => r.json()),
+      fetch(`${api}/api/intents`).then((r) => r.json()),
+    ]).then(([a, i]) => {
+      setAirlines(a.items);
+      setIntents(i.items);
+    });
+  }, []);
+  async function start() {
+    if (!airline || !intent) return;
+    const r = await fetch(`${api}/api/conversations`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ airline_id: +airline, intent_id: +intent }),
+    });
+    const c = await r.json();
+    setConversation(c);
+    setMessages([]);
+    setState("Ready");
+  }
+  async function send() {
+    if (!conversation || !text.trim()) return;
+    setState("Sending…");
+    const r = await fetch(
+      `${api}/api/conversations/${conversation.id}/messages`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: text }),
+      },
+    );
+    const d = await r.json();
+    if (!r.ok) {
+      setState(d.detail ?? "Unable to send message");
+      return;
+    }
+    setMessages((m) => [...m, d.user_message, d.assistant_message]);
+    setText("");
+    setState("Ready");
+  }
+  async function rate(rating: string) {
+    await fetch(`${api}/api/conversations/${conversation.id}/rating`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rating }),
+    });
+    setState(`Rated ${rating}`);
+  }
+  return (
+    <main className="mx-auto max-w-3xl p-8">
+      <h1 className="text-3xl font-semibold">Airline chat</h1>
+      <div className="mt-6 grid gap-3 sm:grid-cols-2">
+        <select
+          value={airline}
+          onChange={(e) => setAirline(e.target.value)}
+          className="rounded border p-2"
+        >
+          <option value="">Choose airline</option>
+          {airlines.map((a) => (
+            <option key={a.id} value={a.id}>
+              {a.name}
+            </option>
+          ))}
+        </select>
+        <select
+          value={intent}
+          onChange={(e) => setIntent(e.target.value)}
+          className="rounded border p-2"
+        >
+          <option value="">Choose intent</option>
+          {intents.map((i) => (
+            <option key={i.id} value={i.id}>
+              {i.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <button
+        onClick={start}
+        className="mt-3 rounded bg-slate-900 px-4 py-2 text-white"
+      >
+        Start conversation
+      </button>
+      <p className="mt-3 text-sm text-slate-600">{state}</p>
+      <section className="mt-6 min-h-48 space-y-2 rounded border bg-white p-4">
+        {messages.length ? (
+          messages.map((m) => (
+            <p key={m.id}>
+              <b>{m.role}:</b> {m.content}
+            </p>
+          ))
+        ) : (
+          <p className="text-slate-500">No messages yet.</p>
+        )}
+      </section>
+      <div className="mt-3 flex gap-2">
+        <input
+          disabled={!conversation}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          className="flex-1 rounded border p-2"
+          placeholder="Ask a question"
+        />
+        <button
+          disabled={!conversation}
+          onClick={send}
+          className="rounded bg-slate-900 px-4 py-2 text-white"
+        >
+          Send
+        </button>
+      </div>
+      {conversation && (
+        <div className="mt-4 flex gap-2">
+          <button
+            onClick={() => rate("positive")}
+            className="rounded border px-3 py-1"
+          >
+            👍
+          </button>
+          <button
+            onClick={() => rate("negative")}
+            className="rounded border px-3 py-1"
+          >
+            👎
+          </button>
+        </div>
+      )}
+    </main>
+  );
+}

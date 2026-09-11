@@ -11,5 +11,8 @@
     "format": "prettier --check .",
     "format:write": "prettier --write ."
   },
-  "devDependencies": {"prettier": "^3.4.2", "turbo": "^2.3.3"}
+  "devDependencies": {
+    "prettier": "^3.4.2",
+    "turbo": "^2.3.3"
+  }
 }

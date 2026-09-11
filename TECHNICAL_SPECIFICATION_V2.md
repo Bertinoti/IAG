@@ -92,26 +92,26 @@ The following are not part of V2:
 
 ## 5. Technology stack
 
-| Area | Technology |
-|---|---|
-| Repository structure | TurboRepo monorepo |
-| Package manager | pnpm |
-| Frontend | Next.js, React, TypeScript |
-| Styling | Tailwind CSS |
-| Charts | Apache ECharts |
-| Component development | Storybook |
-| Backend | FastAPI |
-| Backend language | Python |
-| Validation | Pydantic |
-| ORM | SQLAlchemy 2.x |
-| Database | SQLite |
-| AI provider | OpenAI API behind an internal provider interface |
-| Backend tests | pytest |
-| BDD | Gherkin and Cucumber-JS |
-| Browser tests | Playwright |
-| Containers | Docker and Docker Compose |
-| CI | GitHub Actions |
-| Future cloud target | AWS-ready, with no AWS deployment in V2 |
+| Area                  | Technology                                       |
+| --------------------- | ------------------------------------------------ |
+| Repository structure  | TurboRepo monorepo                               |
+| Package manager       | pnpm                                             |
+| Frontend              | Next.js, React, TypeScript                       |
+| Styling               | Tailwind CSS                                     |
+| Charts                | Apache ECharts                                   |
+| Component development | Storybook                                        |
+| Backend               | FastAPI                                          |
+| Backend language      | Python                                           |
+| Validation            | Pydantic                                         |
+| ORM                   | SQLAlchemy 2.x                                   |
+| Database              | SQLite                                           |
+| AI provider           | OpenAI API behind an internal provider interface |
+| Backend tests         | pytest                                           |
+| BDD                   | Gherkin and Cucumber-JS                          |
+| Browser tests         | Playwright                                       |
+| Containers            | Docker and Docker Compose                        |
+| CI                    | GitHub Actions                                   |
+| Future cloud target   | AWS-ready, with no AWS deployment in V2          |
 
 No technology from the `Base_Node_React` stack may be introduced unless explicitly added to this specification.
 

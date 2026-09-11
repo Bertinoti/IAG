@@ -10,6 +10,9 @@ class Settings(BaseModel):
     database_url: str = "sqlite:///./data/airline.db"
     session_secret: str = "local-development-secret"
     openai_api_key: str | None = None
+    openai_model: str = "gpt-4o-mini"
+    input_price_per_token: float = 0.00000015
+    output_price_per_token: float = 0.0000006
     admin_email: str = "admin@example.com"
     admin_password: str = "ChangeMe123!"
     session_cookie_name: str = "airline_admin_session"
@@ -25,6 +28,9 @@ def get_settings() -> Settings:
         database_url=os.getenv("DATABASE_URL", "sqlite:///./data/airline.db"),
         session_secret=os.getenv("SESSION_SECRET", "local-development-secret"),
         openai_api_key=os.getenv("OPENAI_API_KEY"),
+        openai_model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+        input_price_per_token=float(os.getenv("INPUT_PRICE_PER_TOKEN", "0.00000015")),
+        output_price_per_token=float(os.getenv("OUTPUT_PRICE_PER_TOKEN", "0.0000006")),
         admin_email=os.getenv("ADMIN_EMAIL", "admin@example.com"),
         admin_password=os.getenv("ADMIN_PASSWORD", "ChangeMe123!"),
         session_cookie_name=os.getenv("SESSION_COOKIE_NAME", "airline_admin_session"),

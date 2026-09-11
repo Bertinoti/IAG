@@ -53,15 +53,15 @@ The practical FastAPI modules are routes/controllers, application services, repo
 
 Approved entities and fields are:
 
-| Entity | Fields and constraints |
-|---|---|
-| User | `id`, `email`, `password_hash`, `role` (`admin` in V2), `created_at`, `updated_at` |
-| AgentConfiguration | `id`, `context`, `guardrails`, `content`, `language`, timestamps; one active configuration required |
-| Airline | `id`, `name`, `code`, `created_at` |
-| Intent | `id`, `name`, `created_at`; seeded fixed list: baggage, check-in, booking, cancellation, flight-status |
-| Conversation | `id`, `airline_id`, `intent_id`, `started_at`, `updated_at` |
-| Message | `id`, `conversation_id`, `role` (`user`/`assistant`), `content`, nullable token fields (`input_tokens`, `output_tokens`, `total_tokens`, `estimated_cost`), `created_at` |
-| ConversationRating | `id`, `conversation_id`, `rating` (`positive`/`negative`), `created_at`; at most one per conversation |
+| Entity             | Fields and constraints                                                                                                                                                   |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| User               | `id`, `email`, `password_hash`, `role` (`admin` in V2), `created_at`, `updated_at`                                                                                       |
+| AgentConfiguration | `id`, `context`, `guardrails`, `content`, `language`, timestamps; one active configuration required                                                                      |
+| Airline            | `id`, `name`, `code`, `created_at`                                                                                                                                       |
+| Intent             | `id`, `name`, `created_at`; seeded fixed list: baggage, check-in, booking, cancellation, flight-status                                                                   |
+| Conversation       | `id`, `airline_id`, `intent_id`, `started_at`, `updated_at`                                                                                                              |
+| Message            | `id`, `conversation_id`, `role` (`user`/`assistant`), `content`, nullable token fields (`input_tokens`, `output_tokens`, `total_tokens`, `estimated_cost`), `created_at` |
+| ConversationRating | `id`, `conversation_id`, `rating` (`positive`/`negative`), `created_at`; at most one per conversation                                                                    |
 
 Relationships: each conversation references one airline and one fixed intent; a conversation has many messages and zero or one rating; the single active agent configuration is loaded when generating a response. Seed data creates one administrator, demonstration airlines, and the fixed intents only—never fake conversations, messages, ratings, usage, or costs. Estimated cost is an application calculation from token usage and documented model-pricing configuration, not provider billing data.
 
@@ -75,16 +75,16 @@ The exact session mechanism remains unresolved and must be approved during archi
 
 The specification requires documented FastAPI REST resources; exact names and schemas are a pre-implementation deliverable. The following is the proposed route plan, subject to architecture/API approval:
 
-| Area | Proposed routes | Purpose |
-|---|---|---|
-| Authentication | `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/session` | establish, end, and inspect the admin session |
-| Dashboard | `GET /api/dashboard?range=7d|30d|all` | KPI aggregates and four chart series |
-| Agent configuration | `GET /api/agent-config`, `PUT /api/agent-config` | retrieve and save the single configuration |
-| Airlines | `GET /api/airlines` | fixed chat selector data |
-| Intents | `GET /api/intents` | seeded fixed-intent selector data |
-| Conversations | `POST /api/conversations`, `GET /api/conversations`, `GET /api/conversations/{id}` | create, paginate/filter table, inspect history and metadata |
-| Messages | `POST /api/conversations/{id}/messages`, `GET /api/conversations/{id}/messages` (if needed by approved response shape) | send a user message and return/persist the assistant response; retrieve history |
-| Ratings | `PUT /api/conversations/{id}/rating` (or approved equivalent) | create/replace the one positive/negative rating |
+| Area                | Proposed routes                                                                                                        | Purpose                                                                         |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Authentication      | `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/session`                                               | establish, end, and inspect the admin session                                   |
+| Dashboard           | `GET /api/dashboard?range=7d                                                                                           | 30d                                                                             | all` | KPI aggregates and four chart series |
+| Agent configuration | `GET /api/agent-config`, `PUT /api/agent-config`                                                                       | retrieve and save the single configuration                                      |
+| Airlines            | `GET /api/airlines`                                                                                                    | fixed chat selector data                                                        |
+| Intents             | `GET /api/intents`                                                                                                     | seeded fixed-intent selector data                                               |
+| Conversations       | `POST /api/conversations`, `GET /api/conversations`, `GET /api/conversations/{id}`                                     | create, paginate/filter table, inspect history and metadata                     |
+| Messages            | `POST /api/conversations/{id}/messages`, `GET /api/conversations/{id}/messages` (if needed by approved response shape) | send a user message and return/persist the assistant response; retrieve history |
+| Ratings             | `PUT /api/conversations/{id}/rating` (or approved equivalent)                                                          | create/replace the one positive/negative rating                                 |
 
 The chat create request must include selected `airline_id` and the approved fixed-intent assignment. Request validation is Pydantic-backed; errors need one documented safe format; pagination and dashboard filters must be explicit. The exact endpoint names, DTOs, status codes, and rating idempotency semantics remain an architecture-phase approval item.
 

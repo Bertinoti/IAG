@@ -1,1 +1,15 @@
-{"name":"@airline-ai/e2e","private":true,"scripts":{"test":"playwright test","bdd":"cucumber-js features --require-module ts-node/register --require steps/**/*.ts","playwright":"playwright test"},"devDependencies":{"@cucumber/cucumber":"^11.0.1","@playwright/test":"^1.49.1","typescript":"^5.7.0","ts-node":"^10.9.2"}}
+{
+  "name": "@airline-ai/e2e",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "bdd": "cucumber-js features --require-module ts-node/register --require steps/**/*.ts",
+    "playwright": "playwright test"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "^11.0.1",
+    "@playwright/test": "^1.49.1",
+    "typescript": "^5.7.0",
+    "ts-node": "^10.9.2"
+  }
+}
