@@ -1,0 +1,4 @@
+interface:
+  display_name: "Base Backend Development"
+  short_description: "Build secure, tested TypeScript backend modules"
+  default_prompt: "Use $base-backend-development to implement or review backend work with Clean Architecture and secure API contracts."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Base Frontend Development"
+  short_description: "Build polished, accessible React interfaces"
+  default_prompt: "Use $base-frontend-development to implement or review frontend work with Tailwind, i18n, and reliable API integration."
