@@ -68,10 +68,15 @@ def get_current_admin(
 
 def seed_admin() -> None:
     from .database import Base, engine, SessionLocal
+    from .models import Airline, Intent
 
     Base.metadata.create_all(engine)
     with SessionLocal() as db:
         email = get_settings().admin_email.strip().lower()
         if db.scalar(select(User).where(User.email == email)) is None:
             db.add(User(email=email, password_hash=hash_password(get_settings().admin_password), role="admin"))
-            db.commit()
+        for name, code in [("Airline One", "AO"), ("Airline Two", "AT"), ("Airline Three", "A3")]:
+            if db.scalar(select(Airline).where(Airline.code == code)) is None: db.add(Airline(name=name, code=code))
+        for name in ["baggage", "check-in", "booking", "cancellation", "flight-status"]:
+            if db.scalar(select(Intent).where(Intent.name == name)) is None: db.add(Intent(name=name))
+        db.commit()
