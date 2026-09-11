@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This repository is a reusable full-stack base for a portfolio-quality application. It must remain easy to understand, test, refactor, and adapt to a concrete product domain.
+This repository is the Airline AI Agent V2 local demo: a small, explainable full-stack application for configuring and using an airline question-answering agent.
 
 ## Decision Record
 
@@ -41,9 +41,7 @@ The entries below describe the reusable Base_Node_React reference and are not im
 - Do not invent business rules, permissions, token lifecycle details, or destructive behavior.
 - Keep the domain independent from frameworks and persistence.
 - Keep API contracts versionable and reflected in frontend types.
-- Treat registration as a complete end-to-end flow, not only a backend endpoint.
-- Registration must create a default `user`; clients must never choose their role.
-- Registration must cover validation, duplicate email, loading, error, success, and redirect states.
+- Keep the V2 scope limited to the seeded administrator and approved product workflows. Public registration, social login, password recovery, email verification, and complex RBAC are out of scope.
 - Use explicit loading, empty, error, success, and confirmation states.
 - Keep translation keys in locale files; do not scatter user-facing strings in components.
 - Never expose secrets, password hashes, refresh tokens, or sensitive provider payloads.
@@ -62,18 +60,15 @@ The entries below describe the reusable Base_Node_React reference and are not im
 
 ## High-Risk Areas
 
-- Refresh-token rotation, revocation, cookie attributes, and CSRF.
-- Google account linking and duplicate-account behavior.
-- Password reset token expiry and one-time use.
-- Role enforcement on both HTTP and UI layers.
-- MongoDB indexes and ownership filters.
-- Error serialization without leaking internals.
-- Keeping frontend route guards consistent with backend authorization.
-- Registration flow consistency between `/register`, `/login`, the API client, and backend auth.
+- Signed cookie expiry, secret rotation, cookie attributes, and cross-site CSRF/CORS.
+- Error serialization without leaking hashes, secrets, provider payloads, or traces.
+- Keeping frontend route checks consistent with backend session enforcement.
+- Atomic message persistence and one-rating-per-conversation behavior.
+- Keeping API schemas, frontend types, OpenAPI, and seeded fixed-intent behavior synchronized.
 
 ## Open Decisions To Resolve Before Domain Work
 
 - None for the V2 implementation scope. The product domain, authentication scope, chart library, and deployment limitations are defined by `TECHNICAL_SPECIFICATION_V2.md`.
 - **Future approval trigger:** a cross-site production deployment would require revisiting cookie/CSRF and CORS settings; AWS deployment itself is outside V2.
 
-Until these are decided, use safe documented defaults and keep providers behind interfaces.
+Keep providers behind interfaces and record any future deployment or product decision before implementation.

@@ -1,35 +1,34 @@
 # Airline AI Agent
 
-Technical foundation for the local Airline AI Agent demo. The repository uses pnpm and TurboRepo with a Next.js web app, a FastAPI API, shared React UI, and an e2e test workspace.
+Local portfolio demo for an airline question-answering agent. The shipped stack is a pnpm/TurboRepo monorepo with Next.js/React web, FastAPI/Python API, SQLAlchemy 2.x, SQLite, shared UI, Gherkin/Cucumber, Playwright, and Storybook.
 
-## Local development
+Next.js owns browser routes, accessible UI state, and one REST client. FastAPI owns validation, authentication, transactions, persistence, prompt construction, and the AI provider boundary. This separation keeps Python/SQLAlchemy concerns out of the browser and keeps OpenAI credentials backend-only.
 
-Copy the relevant `.env.example` files to `.env`, install pnpm dependencies, and run:
+## Structure and data
 
-```bash
-pnpm install
-pnpm dev
-```
+- `apps/web`: `/login`, `/dashboard`, `/agent`, and `/chat`.
+- `apps/api/app`: configuration, auth, SQLAlchemy models/database, routes, `PromptBuilder`, and `AIProvider`.
+- `packages/ui`: reusable React components and stories.
+- `e2e`: Gherkin features, Cucumber bindings, and Playwright tests.
 
-The web app is served on port 3000 and the API health endpoint is available at `http://localhost:8000/health`.
+FastAPI routes depend on application/provider boundaries; SQLAlchemy and AI adapters are at the outside. SQLite stores the approved User, AgentConfiguration, Airline, Intent, Conversation, Message, and ConversationRating entities.
+
+## Run locally
+
+Copy the relevant `.env.example` files to `.env`, then run `pnpm install` and `pnpm dev`. Web is on port 3000 and API on port 8000. The default seeded admin is `admin@example.com` / `ChangeMe123!`; override it through environment variables.
 
 ## Docker
 
-```bash
-docker compose up --build
-```
+`docker compose up --build` starts web and API and persists SQLite in the `sqlite-data` volume.
 
-The API stores SQLite data in the `sqlite-data` persistent volume. Administrator authentication is implemented with a seeded account and signed HttpOnly cookie sessions. Dashboard, chat, OpenAI, and other product workflows remain deferred to later approved phases.
+Variables include `NEXT_PUBLIC_API_URL`, `API_HOST`, `API_PORT`, `DATABASE_URL`, `SESSION_SECRET`, `SESSION_COOKIE_NAME`, `SESSION_MAX_AGE`, `COOKIE_SECURE`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and optional `OPENAI_API_KEY`. Real `.env` files are ignored.
 
-The default local administrator is `admin@example.com` / `ChangeMe123!`; override `ADMIN_EMAIL` and `ADMIN_PASSWORD` through environment variables for local use.
+## Behavior and testing
 
-## Checks
+Login sets a signed HttpOnly, SameSite=Lax cookie containing an admin id and expiry; logout clears it and protected routes validate it. `/agent` persists Context, Guardrails, Content, and Language. `/chat` requires a seeded airline and fixed intent, persists messages and token/cost metrics, and supports one rating. `PromptBuilder` centralizes prompts; `AIProvider` is the only AI boundary. Estimated cost is an application metric, not provider billing.
 
-```bash
-pnpm lint
-pnpm typecheck
-pnpm test
-pnpm build
-```
+pytest covers health, auth, validation, and protected access. Cucumber-JS expresses business scenarios, Playwright runs browser journeys, and Storybook isolates shared components. Automated AI tests must inject a fake provider.
 
-Python tests run from `apps/api` after installing `requirements.txt` with `pytest`.
+Verified: Docker build/start, API health, web production build, web typecheck/lint, and pytest (5 passed). Cucumber, full Playwright journeys, and Storybook build remain scaffolding.
+
+AWS deployment, real airline integrations, RAG, queues, WebSockets, public registration, social login, password recovery, and email verification are outside V2. The local cookie has no server-side revocation store; cross-site deployment needs a new CSRF/CORS review.
