@@ -1,0 +1,1 @@
+{"name":"@airline-ai/e2e","private":true,"scripts":{"test":"echo \"e2e scenarios pending product phases\"","bdd":"echo \"Cucumber-JS setup pending product phases\"","playwright":"echo \"Playwright setup pending product phases\""},"devDependencies":{"@cucumber/cucumber":"^11.0.1","@playwright/test":"^1.49.1","typescript":"^5.7.0"}}

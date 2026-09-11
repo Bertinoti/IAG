@@ -1,0 +1,12 @@
+node_modules
+.next
+dist
+coverage
+.turbo
+.env
+.env.*
+!.env.example
+apps/api/.venv
+apps/api/__pycache__
+apps/api/*.db
+*.pyc
