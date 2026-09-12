@@ -24,15 +24,20 @@ export default function LoginPage() {
     }
   }
   return (
-    <main className="flex min-h-screen items-center justify-center px-6">
+    <main className="flex min-h-screen items-center justify-center px-6 py-12">
       <form
         onSubmit={submit}
-        className="w-full max-w-md space-y-5 rounded-xl bg-white p-8 shadow"
+        className="w-full max-w-md space-y-6 rounded-2xl border border-slate-200/80 bg-white p-8 shadow-soft"
         aria-label="Administrator login"
       >
         <div>
-          <h1 className="text-2xl font-semibold">Administrator sign in</h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="text-sm font-semibold uppercase tracking-[.18em] text-brand-600">
+            Airline intelligence
+          </p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight">
+            Welcome back
+          </h1>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
             Use the seeded administrator account.
           </p>
         </div>
@@ -43,7 +48,7 @@ export default function LoginPage() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 w-full rounded border p-2"
+            className="mt-2 w-full rounded-xl border bg-slate-50 px-3 py-2.5 transition placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:outline-none"
           />
         </label>
         <label className="block text-sm font-medium">
@@ -53,7 +58,7 @@ export default function LoginPage() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 w-full rounded border p-2"
+            className="mt-2 w-full rounded-xl border bg-slate-50 px-3 py-2.5 transition focus:border-brand-500 focus:bg-white focus:outline-none"
           />
         </label>
         {error && (
@@ -63,7 +68,7 @@ export default function LoginPage() {
         )}
         <button
           disabled={loading}
-          className="w-full rounded bg-slate-900 px-4 py-2 text-white disabled:opacity-50"
+          className="w-full rounded-xl bg-brand-600 px-4 py-3 font-semibold text-white shadow-sm transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? "Signing in…" : "Sign in"}
         </button>

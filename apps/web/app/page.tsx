@@ -2,15 +2,25 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <main className="mx-auto min-h-screen max-w-4xl px-6 py-16">
-      <h1 className="text-3xl font-semibold">Airline AI Agent</h1>
-      <p className="mt-3 text-slate-600">Administrator backoffice</p>
-      <Link
-        className="mt-6 inline-block rounded bg-slate-900 px-4 py-2 text-white"
-        href="/login"
-      >
-        Sign in
-      </Link>
+    <main className="mx-auto flex min-h-screen max-w-5xl items-center px-6 py-16">
+      <div className="max-w-2xl">
+        <p className="mb-4 text-sm font-semibold uppercase tracking-[.22em] text-brand-600">
+          Airline intelligence
+        </p>
+        <h1 className="text-5xl font-semibold tracking-tight text-ink sm:text-6xl">
+          A calmer way to manage airline support.
+        </h1>
+        <p className="mt-6 max-w-xl text-lg leading-8 text-slate-600">
+          Configure your assistant, review conversations, and understand
+          customer questions from one focused workspace.
+        </p>
+        <Link
+          className="mt-8 inline-flex items-center rounded-xl bg-brand-600 px-5 py-3 font-semibold text-white shadow-soft transition hover:bg-brand-700"
+          href="/login"
+        >
+          Open workspace <span className="ml-2">→</span>
+        </Link>
+      </div>
     </main>
   );
 }

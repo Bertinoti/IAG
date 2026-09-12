@@ -50,7 +50,7 @@ Start the development services with `pnpm dev`. Web is on port 3000 and API on p
 
 ## Docker
 
-`docker compose up --build` starts web and API and persists SQLite in the `sqlite-data` volume.
+Copy `apps/api/.env.example` to `apps/api/.env`, set a strong `SESSION_SECRET`, and provide `OPENAI_API_KEY` for real responses. Then `docker compose up --build` starts web and API and persists SQLite in the `sqlite-data` volume.
 
 Variables include `NEXT_PUBLIC_API_URL`, `API_HOST`, `API_PORT`, `DATABASE_URL`, `SESSION_SECRET`, `SESSION_COOKIE_NAME`, `SESSION_MAX_AGE`, `COOKIE_SECURE`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and optional `OPENAI_API_KEY`. Real `.env` files are ignored.
 
@@ -60,10 +60,10 @@ Login sets a signed HttpOnly, SameSite=Lax cookie containing an admin id and exp
 
 pytest covers health, auth, validation, and protected access. Cucumber-JS expresses business scenarios, Playwright runs browser journeys, and Storybook isolates shared components. Automated AI tests must inject a fake provider.
 
-Verified: Docker image build/start, API health, web production build, web typecheck/lint, pytest (7 passed), and Cucumber (4 scenarios, 13 steps passed). Full Playwright journeys and Storybook build remain scaffolding because the current Windows environment blocks Storybook child-process/file creation.
+Verified: Docker image build/start, API health, web production build, web typecheck/lint, pytest (7 passed), Cucumber (4 scenarios, 13 steps passed), Playwright (2 passed), and Storybook build. Automated chat tests mock the AI provider.
 
 Pull requests are checked by `.github/workflows/ci.yml`, which runs API compilation and pytest, workspace lint/typecheck/build, Cucumber, Storybook, Docker Compose validation/image builds, and Playwright browser journeys against the Docker services.
 
-The Prettier check currently reports pre-existing formatting differences in source and documentation files; generated Storybook, Playwright, and build artifacts are excluded through `.prettierignore`.
+Generated Storybook, Playwright, and build artifacts are excluded through `.prettierignore`.
 
 AWS deployment, real airline integrations, RAG, queues, WebSockets, public registration, social login, password recovery, and email verification are outside V2. The local cookie has no server-side revocation store; cross-site deployment needs a new CSRF/CORS review.

@@ -60,13 +60,23 @@ export default function ChatPage() {
     setState(`Rated ${rating}`);
   }
   return (
-    <main className="mx-auto max-w-3xl p-8">
-      <h1 className="text-3xl font-semibold">Airline chat</h1>
-      <div className="mt-6 grid gap-3 sm:grid-cols-2">
+    <main className="mx-auto max-w-4xl px-6 py-10 sm:py-14">
+      <div className="mb-8">
+        <p className="text-sm font-semibold uppercase tracking-[.18em] text-brand-600">
+          Public assistant
+        </p>
+        <h1 className="mt-2 text-4xl font-semibold tracking-tight">
+          Ask about your journey
+        </h1>
+        <p className="mt-2 text-slate-600">
+          Choose an airline and a supported topic to start a conversation.
+        </p>
+      </div>
+      <div className="grid gap-3 rounded-2xl border bg-white p-5 shadow-soft sm:grid-cols-2">
         <select
           value={airline}
           onChange={(e) => setAirline(e.target.value)}
-          className="rounded border p-2"
+          className="rounded-xl border bg-slate-50 px-3 py-2.5 focus:border-brand-500 focus:bg-white focus:outline-none"
         >
           <option value="">Choose airline</option>
           {airlines.map((a) => (
@@ -78,7 +88,7 @@ export default function ChatPage() {
         <select
           value={intent}
           onChange={(e) => setIntent(e.target.value)}
-          className="rounded border p-2"
+          className="rounded-xl border bg-slate-50 px-3 py-2.5 focus:border-brand-500 focus:bg-white focus:outline-none"
         >
           <option value="">Choose intent</option>
           {intents.map((i) => (
@@ -90,20 +100,28 @@ export default function ChatPage() {
       </div>
       <button
         onClick={start}
-        className="mt-3 rounded bg-slate-900 px-4 py-2 text-white"
+        className="mt-4 rounded-lg bg-brand-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700 disabled:opacity-50"
       >
         Start conversation
       </button>
       <p className="mt-3 text-sm text-slate-600">{state}</p>
-      <section className="mt-6 min-h-48 space-y-2 rounded border bg-white p-4">
+      <section className="mt-6 min-h-56 space-y-3 rounded-2xl border bg-white p-5 shadow-soft">
         {messages.length ? (
           messages.map((m) => (
-            <p key={m.id}>
-              <b>{m.role}:</b> {m.content}
+            <p
+              key={m.id}
+              className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-6 ${m.role === "user" ? "ml-auto bg-brand-600 text-white" : "bg-slate-100 text-slate-700"}`}
+            >
+              <span className="mr-1 font-semibold">
+                {m.role === "user" ? "You" : "Assistant"}:
+              </span>{" "}
+              {m.content}
             </p>
           ))
         ) : (
-          <p className="text-slate-500">No messages yet.</p>
+          <p className="text-sm text-slate-500">
+            No messages yet. Start by choosing your airline and topic.
+          </p>
         )}
       </section>
       <div className="mt-3 flex gap-2">
@@ -111,13 +129,19 @@ export default function ChatPage() {
           disabled={!conversation}
           value={text}
           onChange={(e) => setText(e.target.value)}
-          className="flex-1 rounded border p-2"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              void send();
+            }
+          }}
+          className="flex-1 rounded-lg border bg-white px-3 py-2.5 focus:border-brand-500 focus:outline-none disabled:bg-slate-100"
           placeholder="Ask a question"
         />
         <button
           disabled={!conversation}
           onClick={send}
-          className="rounded bg-slate-900 px-4 py-2 text-white"
+          className="rounded-lg bg-brand-600 px-3.5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Send
         </button>
@@ -126,13 +150,13 @@ export default function ChatPage() {
         <div className="mt-4 flex gap-2">
           <button
             onClick={() => rate("positive")}
-            className="rounded border px-3 py-1"
+            className="rounded-lg border bg-white px-2.5 py-1.5 text-sm font-medium transition hover:border-emerald-400 hover:bg-emerald-50"
           >
             👍
           </button>
           <button
             onClick={() => rate("negative")}
-            className="rounded border px-3 py-1"
+            className="rounded-lg border bg-white px-2.5 py-1.5 text-sm font-medium transition hover:border-rose-400 hover:bg-rose-50"
           >
             👎
           </button>
