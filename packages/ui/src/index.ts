@@ -3,3 +3,8 @@ export { Input } from "./input";
 export { MetricCard } from "./metric-card";
 export { MessageBubble } from "./message-bubble";
 export { ChatWidget } from "./chat-widget";
+export { Alert } from "./alert";
+export { Badge } from "./badge";
+export { Spinner } from "./spinner";
+export { Select } from "./select";
+export { Modal } from "./modal";

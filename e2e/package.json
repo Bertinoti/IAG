@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "test": "playwright test",
-    "bdd": "cucumber-js features --require-module ts-node/register --require steps/**/*.ts",
+    "bdd": "cucumber-js features/airline-ai.feature --require-module ts-node/register --require support/*.ts --require steps/*.ts",
     "playwright": "playwright test"
   },
   "devDependencies": {
