@@ -4,7 +4,7 @@ class ConfigPayload(BaseModel):
     context: str = Field(max_length=10000)
     guardrails: str = Field(max_length=10000)
     content: str = Field(max_length=10000)
-    language: str = Field(min_length=1, max_length=50)
+    language: str = Field(min_length=1, max_length=300)
 
 class ConversationPayload(BaseModel):
     airline_id: int

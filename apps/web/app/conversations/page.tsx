@@ -36,8 +36,10 @@ export default function ConversationsPage() {
                       {c.id}
                     </Link>
                   </td>
-                  <td className="p-3">{c.airline_id}</td>
-                  <td className="p-3">{c.intent_id}</td>
+                  <td className="p-3">
+                    {c.airline_code || c.airline_name || "—"}
+                  </td>
+                  <td className="p-3 capitalize">{c.intent_name || "—"}</td>
                   <td className="p-3">{c.message_count}</td>
                 </tr>
               ))

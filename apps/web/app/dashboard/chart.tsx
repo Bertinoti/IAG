@@ -4,9 +4,11 @@ const ReactECharts = dynamic(() => import("echarts-for-react"), { ssr: false });
 export function Chart({
   title,
   items,
+  type = "bar",
 }: {
   title: string;
   items: { label: string; value: number }[];
+  type?: "bar" | "pie";
 }) {
   const palette = ["#737373", "#4f7188", "#5d8a88", "#b28a56", "#80677f"];
   const option = {
@@ -18,28 +20,60 @@ export function Chart({
       textStyle: { fontSize: 14, fontWeight: 600, color: "#3f3f46" },
     },
     tooltip: {
-      trigger: "axis",
+      trigger: type === "pie" ? "item" : "axis",
       axisPointer: { type: "shadow" },
       backgroundColor: "#27272a",
       borderWidth: 0,
       textStyle: { color: "#fff" },
     },
-    grid: { left: 42, right: 18, top: 58, bottom: 38, containLabel: true },
-    xAxis: {
-      type: "category",
-      data: items.map((i) => i.label),
-      axisLabel: { color: "#71717a" },
-      axisLine: { lineStyle: { color: "#e4e4e7" } },
-    },
-    yAxis: {
-      type: "value",
-      axisLabel: { color: "#a1a1aa" },
-      splitLine: { lineStyle: { color: "#f4f4f5", type: "dashed" } },
-    },
+    // Pie labels carry the share directly on each slice, so a separate legend
+    // is unnecessary and would duplicate the information.
+    legend:
+      type === "pie"
+        ? { show: true, bottom: 4, textStyle: { color: "#71717a" } }
+        : undefined,
+    grid:
+      type === "bar"
+        ? { left: 42, right: 18, top: 58, bottom: 38, containLabel: true }
+        : undefined,
+    xAxis:
+      type === "bar"
+        ? {
+            type: "category",
+            data: items.map((i) => i.label),
+            axisLabel: { color: "#71717a" },
+            axisLine: { lineStyle: { color: "#e4e4e7" } },
+          }
+        : undefined,
+    yAxis:
+      type === "bar"
+        ? {
+            type: "value",
+            axisLabel: { color: "#a1a1aa" },
+            splitLine: { lineStyle: { color: "#f4f4f5", type: "dashed" } },
+          }
+        : undefined,
     series: [
       {
-        type: "bar",
-        data: items.map((i) => i.value),
+        type,
+        data:
+          type === "pie"
+            ? items.map((i) => ({ name: i.label, value: i.value }))
+            : items.map((i) => i.value),
+        radius: type === "pie" ? ["38%", "68%"] : undefined,
+        center: type === "pie" ? ["50%", "56%"] : undefined,
+        label:
+          type === "pie"
+            ? {
+                show: true,
+                formatter: (params: { percent: number }) =>
+                  `${params.percent.toFixed(1)}%`,
+                color: "#27272a",
+                fontSize: 12,
+                fontWeight: 600,
+              }
+            : undefined,
+        labelLine: type === "pie" ? { show: false } : undefined,
         itemStyle: {
           color: (params: { dataIndex: number }) =>
             palette[params.dataIndex % palette.length],

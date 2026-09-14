@@ -9,8 +9,9 @@ class AIResult:
     output_tokens: int
 
 class PromptBuilder:
-    def build(self, context: str, guardrails: str, content: str, language: str, airline: str, intent: str, message: str) -> str:
-        return f"Context: {context}\nGuardrails: {guardrails}\nContent: {content}\nLanguage: {language}\nAirline: {airline}\nIntent: {intent}\nUser: {message}"
+    def build(self, context: str, guardrails: str, content: str, language: str, airline: str, intent: str, message: str, history: str = "") -> str:
+        conversation = f"Conversation history:\n{history}\n" if history else ""
+        return f"Context: {context}\nGuardrails: {guardrails}\nContent: {content}\nLanguage: {language}\nAirline: {airline}\nIntent: {intent}\n{conversation}Latest user message: {message}"
 
 class AIProvider:
     def complete(self, prompt: str) -> AIResult:

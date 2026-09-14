@@ -9,7 +9,12 @@ export default function ChatPage() {
     [conversation, setConversation] = useState<any>(null),
     [messages, setMessages] = useState<any[]>([]),
     [text, setText] = useState(""),
-    [state, setState] = useState("Select an airline and intent to begin.");
+    [state, setState] = useState("Select an airline and intent to begin."),
+    [pendingSelection, setPendingSelection] = useState<{
+      field: "airline" | "intent";
+      value: string;
+    } | null>(null);
+  const [sending, setSending] = useState(false);
   useEffect(() => {
     Promise.all([
       fetch(`${api}/api/airlines`).then((r) => r.json()),
@@ -19,20 +24,55 @@ export default function ChatPage() {
       setIntents(i.items);
     });
   }, []);
-  async function start() {
-    if (!airline || !intent) return;
+  async function start(nextAirline = airline, nextIntent = intent) {
+    if (!nextAirline || !nextIntent) return;
     const r = await fetch(`${api}/api/conversations`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ airline_id: +airline, intent_id: +intent }),
+      body: JSON.stringify({
+        airline_id: +nextAirline,
+        intent_id: +nextIntent,
+      }),
     });
     const c = await r.json();
     setConversation(c);
     setMessages([]);
     setState("Ready");
   }
+  function requestSelection(field: "airline" | "intent", value: string) {
+    const nextAirline = field === "airline" ? value : airline;
+    const nextIntent = field === "intent" ? value : intent;
+    const changesSelection = value !== (field === "airline" ? airline : intent);
+    if (changesSelection && conversation) {
+      setPendingSelection({ field, value });
+      return;
+    }
+    if (field === "airline") setAirline(value);
+    else setIntent(value);
+    if (!conversation && nextAirline && nextIntent) {
+      setState("Starting a new conversation…");
+      void start(nextAirline, nextIntent);
+    }
+  }
+  function confirmNewConversation() {
+    if (!pendingSelection) return;
+    const nextAirline =
+      pendingSelection.field === "airline" ? pendingSelection.value : airline;
+    const nextIntent =
+      pendingSelection.field === "intent" ? pendingSelection.value : intent;
+    if (pendingSelection.field === "airline")
+      setAirline(pendingSelection.value);
+    else setIntent(pendingSelection.value);
+    setConversation(null);
+    setMessages([]);
+    setText("");
+    setState("Starting a new conversation…");
+    setPendingSelection(null);
+    void start(nextAirline, nextIntent);
+  }
   async function send() {
-    if (!conversation || !text.trim()) return;
+    if (!conversation || !text.trim() || sending) return;
+    setSending(true);
     setState("Sending…");
     const r = await fetch(
       `${api}/api/conversations/${conversation.id}/messages`,
@@ -45,11 +85,13 @@ export default function ChatPage() {
     const d = await r.json();
     if (!r.ok) {
       setState(d.detail ?? "Unable to send message");
+      setSending(false);
       return;
     }
     setMessages((m) => [...m, d.user_message, d.assistant_message]);
     setText("");
     setState("Ready");
+    setSending(false);
   }
   async function rate(rating: string) {
     await fetch(`${api}/api/conversations/${conversation.id}/rating`, {
@@ -75,7 +117,7 @@ export default function ChatPage() {
       <div className="grid gap-3 rounded-2xl border bg-white p-5 shadow-soft sm:grid-cols-2">
         <select
           value={airline}
-          onChange={(e) => setAirline(e.target.value)}
+          onChange={(e) => requestSelection("airline", e.target.value)}
           className="rounded-xl border bg-slate-50 px-3 py-2.5 focus:border-brand-500 focus:bg-white focus:outline-none"
         >
           <option value="">Choose airline</option>
@@ -87,7 +129,7 @@ export default function ChatPage() {
         </select>
         <select
           value={intent}
-          onChange={(e) => setIntent(e.target.value)}
+          onChange={(e) => requestSelection("intent", e.target.value)}
           className="rounded-xl border bg-slate-50 px-3 py-2.5 focus:border-brand-500 focus:bg-white focus:outline-none"
         >
           <option value="">Choose intent</option>
@@ -98,12 +140,6 @@ export default function ChatPage() {
           ))}
         </select>
       </div>
-      <button
-        onClick={start}
-        className="mt-4 rounded-lg bg-brand-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700 disabled:opacity-50"
-      >
-        Start conversation
-      </button>
       <p className="mt-3 text-sm text-slate-600">{state}</p>
       <section className="mt-6 min-h-56 space-y-3 rounded-2xl border bg-white p-5 shadow-soft">
         {messages.length ? (
@@ -124,28 +160,41 @@ export default function ChatPage() {
           </p>
         )}
       </section>
-      <div className="mt-3 flex gap-2">
+      <form
+        className="mt-3 flex min-w-0 gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          void send();
+        }}
+      >
         <input
-          disabled={!conversation}
+          disabled={!conversation || sending}
           value={text}
           onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              void send();
-            }
-          }}
-          className="flex-1 rounded-lg border bg-white px-3 py-2.5 focus:border-brand-500 focus:outline-none disabled:bg-slate-100"
+          className="min-w-0 flex-1 rounded-lg border bg-white px-3 py-2.5 focus:border-brand-500 focus:outline-none disabled:bg-slate-100"
           placeholder="Ask a question"
         />
         <button
-          disabled={!conversation}
-          onClick={send}
-          className="rounded-lg bg-brand-600 px-3.5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={!conversation || sending}
+          type="submit"
+          className="shrink-0 whitespace-nowrap rounded-lg bg-brand-600 px-2.5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50 sm:px-3.5"
         >
-          Send
+          {sending ? (
+            <span className="inline-flex items-center gap-2">
+              <span
+                className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"
+                aria-hidden="true"
+              />
+              <span className="hidden sm:inline">Sending</span>
+              <span className="sm:hidden" aria-label="Sending">
+                …
+              </span>
+            </span>
+          ) : (
+            "Send"
+          )}
         </button>
-      </div>
+      </form>
       {conversation && (
         <div className="mt-4 flex gap-2">
           <button
@@ -160,6 +209,41 @@ export default function ChatPage() {
           >
             👎
           </button>
+        </div>
+      )}
+      {pendingSelection && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 px-6">
+          <div
+            className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="new-conversation-title"
+          >
+            <h2 id="new-conversation-title" className="text-xl font-semibold">
+              Start a new conversation?
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              {conversation
+                ? `Changing the ${pendingSelection.field} will end this conversation and clear its messages.`
+                : "Your selections are ready. Start a new conversation with these options?"}
+            </p>
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setPendingSelection(null)}
+                className="rounded-lg border px-3 py-2 text-sm font-medium hover:bg-slate-50"
+              >
+                Keep conversation
+              </button>
+              <button
+                type="button"
+                onClick={confirmNewConversation}
+                className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-700"
+              >
+                Start conversation
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </main>

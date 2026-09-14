@@ -56,7 +56,7 @@ Variables include `NEXT_PUBLIC_API_URL`, `API_HOST`, `API_PORT`, `DATABASE_URL`,
 
 ## Behavior and testing
 
-Login sets a signed HttpOnly, SameSite=Lax cookie containing an admin id and expiry; logout clears it and protected routes validate it. `/agent` persists Context, Guardrails, Content, and Language. `/chat` requires a seeded airline and fixed intent, persists messages and token/cost metrics, and supports one rating. `PromptBuilder` centralizes prompts; `AIProvider` is the only AI boundary. Estimated cost is an application metric, not provider billing.
+Login sets a signed HttpOnly, SameSite=Lax cookie containing an admin id and expiry; logout clears it and protected routes validate it. `/agent` persists the global Context, Guardrails, Content, and Language. `/airlines` stores the same prompt fields per airline, with the global configuration as fallback. `/chat` requires a seeded airline and fixed intent, persists messages and token/cost metrics, and supports one rating. `PromptBuilder` centralizes prompts; `AIProvider` is the only AI boundary. Estimated cost is an application metric, not provider billing.
 
 pytest covers health, auth, validation, and protected access. Cucumber-JS expresses business scenarios, Playwright runs browser journeys, and Storybook isolates shared components. Automated AI tests must inject a fake provider.
 

@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .auth import get_current_admin, seed_admin
 from .models import User
-from .routers import agent_config, auth, catalog, conversations, dashboard
+from .routers import agent_config, airline_config, auth, catalog, conversations, dashboard
 
 
 @asynccontextmanager
@@ -20,6 +20,7 @@ app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000"], allo
 app.include_router(auth.router)
 app.include_router(catalog.router)
 app.include_router(agent_config.router)
+app.include_router(airline_config.router)
 app.include_router(conversations.router)
 app.include_router(dashboard.router)
 

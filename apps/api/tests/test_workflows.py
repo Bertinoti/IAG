@@ -22,4 +22,16 @@ def test_configuration_and_dashboard_aggregates() -> None:
         dashboard = client.get("/api/dashboard?range=all").json()
         assert dashboard["kpis"]["total_conversations"] >= 1
         assert dashboard["conversations_by_airline"]
+        assert dashboard["language_distribution"]
     app.dependency_overrides.clear()
+
+def test_airline_prompt_configuration_is_protected_and_persisted() -> None:
+    with TestClient(app) as public:
+        assert public.get("/api/airline-config").status_code == 401
+    with admin_client() as client:
+        airline_id = client.get("/api/airlines").json()["items"][0]["id"]
+        saved = client.put(f"/api/airline-config/{airline_id}", json={"context": "Brand context", "guardrails": "Stay factual", "content": "Airline policies", "language": "English"})
+        assert saved.status_code == 200
+        assert saved.json()["configuration"]["context"] == "Brand context"
+        listed = client.get("/api/airline-config").json()
+        assert any(item["configuration"]["context"] == "Brand context" for item in listed["items"])

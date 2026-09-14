@@ -22,7 +22,7 @@ class AgentConfiguration(Base):
     context: Mapped[str] = mapped_column(Text, default="")
     guardrails: Mapped[str] = mapped_column(Text, default="")
     content: Mapped[str] = mapped_column(Text, default="")
-    language: Mapped[str] = mapped_column(String(20), default="English")
+    language: Mapped[str] = mapped_column(String(300), default="English")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -32,6 +32,18 @@ class Airline(Base):
     name: Mapped[str] = mapped_column(String(120), unique=True)
     code: Mapped[str] = mapped_column(String(10), unique=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+class AirlinePromptConfiguration(Base):
+    __tablename__ = "airline_prompt_configurations"
+    __table_args__ = (UniqueConstraint("airline_id"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    airline_id: Mapped[int] = mapped_column(ForeignKey("airlines.id"), index=True)
+    context: Mapped[str] = mapped_column(Text, default="")
+    guardrails: Mapped[str] = mapped_column(Text, default="")
+    content: Mapped[str] = mapped_column(Text, default="")
+    language: Mapped[str] = mapped_column(String(300), default="English")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 class Intent(Base):
     __tablename__ = "intents"
@@ -44,6 +56,7 @@ class Conversation(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     airline_id: Mapped[int] = mapped_column(ForeignKey("airlines.id"))
     intent_id: Mapped[int] = mapped_column(ForeignKey("intents.id"))
+    language: Mapped[str] = mapped_column(String(20), default="unknown")
     started_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

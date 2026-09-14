@@ -26,8 +26,8 @@ export default function DashboardPage() {
   if (!admin) return null;
   const k = data?.kpis ?? {};
   return (
-    <main className="mx-auto max-w-5xl p-8">
-      <div className="flex items-center justify-between">
+    <main className="mx-auto max-w-5xl p-4 sm:p-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-semibold">Dashboard</h1>
           <p className="mt-2 text-slate-600">Signed in as {admin.email}</p>
@@ -53,7 +53,7 @@ export default function DashboardPage() {
           <option value="all">All time</option>
         </select>
       </div>
-      <section className="mt-6 grid gap-3 sm:grid-cols-3">
+      <section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
         {[
           ["Conversations", k.total_conversations],
           ["Messages", k.total_messages],
@@ -74,21 +74,28 @@ export default function DashboardPage() {
           </article>
         ))}
       </section>
-      <section className="mt-6 grid gap-4 md:grid-cols-3">
-        <article className="rounded border bg-white p-2">
+      <section className="mt-6 grid gap-4 md:grid-cols-2">
+        <article className="min-w-0 overflow-hidden rounded border bg-white p-1 sm:p-2">
           <Chart
             title="By airline"
             items={data?.conversations_by_airline ?? []}
           />
         </article>
-        <article className="rounded border bg-white p-2">
+        <article className="min-w-0 overflow-hidden rounded border bg-white p-1 sm:p-2">
           <Chart
             title="Intent distribution"
             items={data?.intent_distribution ?? []}
           />
         </article>
-        <article className="rounded border bg-white p-2">
+        <article className="min-w-0 overflow-hidden rounded border bg-white p-1 sm:p-2">
           <Chart title="Feedback" items={data?.feedback_distribution ?? []} />
+        </article>
+        <article className="min-w-0 overflow-hidden rounded border bg-white p-1 sm:p-2">
+          <Chart
+            title="Languages"
+            items={data?.language_distribution ?? []}
+            type="pie"
+          />
         </article>
       </section>
     </main>
