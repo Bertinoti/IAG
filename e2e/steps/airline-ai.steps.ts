@@ -166,8 +166,8 @@ When(
   "a user selects an airline and approved fixed intent",
   async function (this: World) {
     await this.page.goto("/chat");
-    await this.page.selectOption("select", "1");
-    await this.page.locator("select").nth(1).selectOption("1");
+    await this.page.getByLabel("Choose airline").selectOption("1");
+    await this.page.getByLabel("Choose intent").selectOption("1");
   },
 );
 When("sends a question", async function (this: World) {
@@ -181,8 +181,8 @@ Then("an assistant response is displayed", async function (this: World) {
 });
 Given("a persisted conversation exists", async function (this: World) {
   await this.page.goto("/chat");
-  await this.page.selectOption("select", "1");
-  await this.page.locator("select").nth(1).selectOption("1");
+  await this.page.getByLabel("Choose airline").selectOption("1");
+  await this.page.getByLabel("Choose intent").selectOption("1");
   await expect(this.page.getByPlaceholder("Ask a question")).toBeEnabled();
 });
 When("the user rates the conversation", async function (this: World) {

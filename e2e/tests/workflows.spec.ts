@@ -37,8 +37,8 @@ test("public chat selects fixed intent and displays a mocked answer", async ({
     }),
   );
   await page.goto("/chat");
-  await page.selectOption("select", "1");
-  await page.selectOption("select:nth-of-type(2)", "1");
+  await page.getByLabel("Choose airline").selectOption("1");
+  await page.getByLabel("Choose intent").selectOption("1");
   await page.getByPlaceholder("Ask a question").fill("Question");
   await page.getByPlaceholder("Ask a question").press("Enter");
   await expect(page.getByText("Mocked answer")).toBeVisible();

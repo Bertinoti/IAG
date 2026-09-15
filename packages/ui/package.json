@@ -7,7 +7,6 @@
   "scripts": {
     "lint": "eslint src --max-warnings=0",
     "typecheck": "tsc --noEmit",
-    "test": "echo \"ui tests pending component phase\"",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },

@@ -58,9 +58,18 @@ Variables include `NEXT_PUBLIC_API_URL`, `API_HOST`, `API_PORT`, `DATABASE_URL`,
 
 Login sets a signed HttpOnly, SameSite=Lax cookie containing an admin id and expiry; logout clears it and protected routes validate it. `/agent` persists the global Context, Guardrails, Content, and Language. `/airlines` stores the same prompt fields per airline, with the global configuration as fallback. `/chat` requires a seeded airline and fixed intent, persists messages and token/cost metrics, and supports one rating. `PromptBuilder` centralizes prompts; `AIProvider` is the only AI boundary. Estimated cost is an application metric, not provider billing.
 
-pytest covers health, auth, validation, and protected access. Cucumber-JS expresses business scenarios, Playwright runs browser journeys, and Storybook isolates shared components. Automated AI tests must inject a fake provider.
+`pnpm test` runs the real Cucumber-JS business scenarios. API pytest is intentionally run separately because it is Python rather than a TurboRepo package:
 
-Verified: Docker image build/start, API health, web production build, web typecheck/lint, pytest (7 passed), Cucumber (4 scenarios, 13 steps passed), Playwright (2 passed), and Storybook build. Automated chat tests mock the AI provider.
+```powershell
+cd C:\Users\jeffe\Documents\GitHub\IAG\apps\api
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python -m pytest -q
+```
+
+Run the other verification suites explicitly with `pnpm format`, `pnpm lint`, `pnpm typecheck`, `pnpm build`, `pnpm --filter @airline-ai/ui build-storybook`, and `pnpm --filter @airline-ai/e2e playwright`. Playwright starts the Next.js dev server automatically; its frontend journeys mock API responses and never call OpenAI. Automated AI tests inject a fake provider.
+
+Verified: Docker image build/start, API health, web production build, web typecheck/lint, pytest (8 passed), Cucumber (4 scenarios, 13 steps passed), Playwright (2 passed), and Storybook build. Automated chat tests mock the AI provider.
 
 Pull requests are checked by `.github/workflows/ci.yml`, which runs API compilation and pytest, workspace lint/typecheck/build, Cucumber, Storybook, Docker Compose validation/image builds, and Playwright browser journeys against the Docker services.
 

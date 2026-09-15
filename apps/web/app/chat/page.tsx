@@ -115,7 +115,12 @@ export default function ChatPage() {
         </p>
       </div>
       <div className="grid gap-3 rounded-2xl border bg-white p-5 shadow-soft sm:grid-cols-2">
+        <label htmlFor="airline" className="sr-only">
+          Choose airline
+        </label>
         <select
+          id="airline"
+          aria-label="Choose airline"
           value={airline}
           onChange={(e) => requestSelection("airline", e.target.value)}
           className="rounded-xl border bg-slate-50 px-3 py-2.5 focus:border-brand-500 focus:bg-white focus:outline-none"
@@ -127,7 +132,12 @@ export default function ChatPage() {
             </option>
           ))}
         </select>
+        <label htmlFor="intent" className="sr-only">
+          Choose intent
+        </label>
         <select
+          id="intent"
+          aria-label="Choose intent"
           value={intent}
           onChange={(e) => requestSelection("intent", e.target.value)}
           className="rounded-xl border bg-slate-50 px-3 py-2.5 focus:border-brand-500 focus:bg-white focus:outline-none"

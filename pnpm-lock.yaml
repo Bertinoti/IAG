@@ -35,6 +35,9 @@ importers:
         specifier: ^19.0.0
         version: 19.3.0(react@19.3.0)
     devDependencies:
+      "@eslint/eslintrc":
+        specifier: ^3.3.7
+        version: 3.3.7
       "@types/node":
         specifier: ^22.0.0
         version: 22.20.2

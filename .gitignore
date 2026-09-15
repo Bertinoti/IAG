@@ -16,3 +16,5 @@ storybook-static
 **/storybook-static
 test-results
 **/test-results
+**/.pytest_cache
+**/pytest-cache-files-*
