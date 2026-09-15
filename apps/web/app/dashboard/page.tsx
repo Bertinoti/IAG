@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Admin, getDashboard, getSession, logout } from "../../lib/api";
+import { Admin, getDashboard, getSession } from "../../lib/api";
 import { Chart } from "./chart";
 
 export default function DashboardPage() {
@@ -32,15 +32,6 @@ export default function DashboardPage() {
           <h1 className="text-3xl font-semibold">Dashboard</h1>
           <p className="mt-2 text-slate-600">Signed in as {admin.email}</p>
         </div>
-        <button
-          onClick={async () => {
-            await logout();
-            router.replace("/login");
-          }}
-          className="rounded border px-4 py-2"
-        >
-          Log out
-        </button>
       </div>
       <div className="mt-6 flex gap-2">
         <select

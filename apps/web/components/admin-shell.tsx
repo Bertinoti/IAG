@@ -27,7 +27,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   }
   return (
     <div className="min-h-screen lg:flex">
-      <aside className={`border-b bg-white lg:fixed lg:inset-y-0 lg:flex lg:flex-col lg:border-b-0 lg:border-r ${collapsed ? "lg:w-20" : "lg:w-1/4"}`}>
+      <aside className={`z-40 border-b bg-white lg:fixed lg:inset-y-0 lg:!flex lg:flex-col lg:border-b-0 lg:border-r ${collapsed ? "lg:w-20" : "lg:w-1/4"}`}>
         <div className="flex items-center justify-start gap-3 px-4 py-4 lg:block lg:px-5 lg:py-5">
           <button
             type="button"
@@ -48,10 +48,11 @@ export function AdminShell({ children }: { children: ReactNode }) {
             IAG <span className={collapsed ? "hidden" : "font-normal text-slate-400"}>workspace</span>
           </Link>
           <button type="button" className="hidden rounded-lg p-2 text-slate-500 hover:bg-slate-100 lg:inline-flex" aria-label={collapsed ? "Expand menu" : "Collapse menu"} onClick={() => setCollapsed((value) => !value)}>{collapsed ? "→" : "←"}</button>
+          <button onClick={signOut} className="ml-auto rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-ink lg:fixed lg:right-6 lg:top-3" aria-label="Sign out">Sign out</button>
         </div>
         <nav
           id="admin-navigation"
-          className="hidden flex-col gap-1 px-3 pb-3 lg:flex lg:space-y-1 lg:px-3"
+          className="hidden flex-col gap-1 px-3 pb-3 lg:!flex lg:space-y-1 lg:px-3"
           aria-label="Backoffice navigation"
         >
           {links.map((link) => {
@@ -71,14 +72,6 @@ export function AdminShell({ children }: { children: ReactNode }) {
           })}
         </nav>
         <div className="hidden flex-1 lg:block" />
-        <div className="hidden border-t p-4 lg:block">
-          <button
-            onClick={signOut}
-            className="w-full rounded-xl px-3 py-2 text-left text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-ink"
-          >
-            Sign out
-          </button>
-        </div>
       </aside>
       {menuOpen && (
         <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Backoffice navigation">
@@ -97,7 +90,9 @@ export function AdminShell({ children }: { children: ReactNode }) {
           </aside>
         </div>
       )}
-      <div className={`min-w-0 flex-1 ${collapsed ? "lg:ml-20" : "lg:ml-[25%]"}`}>{children}</div>
+      <div className={`min-w-0 flex-1 ${collapsed ? "lg:ml-20" : "lg:ml-[25%]"}`}>
+        {children}
+      </div>
     </div>
   );
 }
