@@ -8,6 +8,7 @@ export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -53,13 +54,26 @@ export default function LoginPage() {
         </label>
         <label className="block text-sm font-medium">
           Password
-          <input
-            required
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="mt-2 w-full rounded-xl border bg-slate-50 px-3 py-2.5 transition focus:border-brand-500 focus:bg-white focus:outline-none"
-          />
+          <span className="relative mt-2 block">
+            <input
+              required
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full rounded-xl border bg-slate-50 px-3 py-2.5 pr-11 transition focus:border-brand-500 focus:bg-white focus:outline-none"
+            />
+            <button
+              type="button"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-pressed={showPassword}
+              onClick={() => setShowPassword((visible) => !visible)}
+              className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-slate-500 hover:text-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500"
+            >
+              <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                {showPassword ? <><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" /><circle cx="12" cy="12" r="3" /></> : <><path d="m3 3 18 18" /><path d="M10.6 5.1A10.8 10.8 0 0 1 12 5c6.5 0 10 7 10 7a18.3 18.3 0 0 1-3.1 3.9M6.2 6.2C3.7 7.9 2 12 2 12s3.5 7 10 7a10.8 10.8 0 0 0 3.4-.6" /><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" /></>}
+              </svg>
+            </button>
+          </span>
         </label>
         {error && (
           <p role="alert" className="text-sm text-red-700">

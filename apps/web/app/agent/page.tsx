@@ -1,7 +1,7 @@
 "use client";
 import { FormEvent, useEffect, useState } from "react";
 import { getSession } from "../../lib/api";
-const api = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const api = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000").replace(/\/$/, "");
 export default function AgentPage() {
   const [form, setForm] = useState({
     context: "",

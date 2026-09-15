@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { getSession } from "../../../lib/api";
-const api = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const api = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000").replace(/\/$/, "");
 export default function ConversationDetail() {
   const { id } = useParams<{ id: string }>();
   const [data, setData] = useState<any>(null);

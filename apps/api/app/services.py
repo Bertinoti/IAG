@@ -14,11 +14,11 @@ def detect_language(message: str) -> str:
     normalized = unicodedata.normalize("NFKD", message.lower()).encode("ascii", "ignore").decode()
     words = set(re.findall(r"[a-z]+", normalized))
     signals = {
-        "Portuguese": {"voo", "bagagem", "obrigado", "obrigada", "remarcacao", "quero", "meu", "minha"},
+        "Portuguese": {"voo", "voos", "bagagem", "obrigado", "obrigada", "remarcacao", "quero", "meu", "minha", "pode", "fornecer", "detalhes", "sao"},
         "Spanish": {"vuelo", "equipaje", "gracias", "hola", "cambio", "quiero", "mi", "que"},
         "English": {"what", "how", "baggage", "flight", "hello", "thanks", "refund", "rebooking", "cancelled", "want", "my", "can", "provide", "details", "please"},
-        "French": {"bonjour", "vol", "bagage", "merci", "remboursement", "reservation", "annule", "je", "mon", "ma"},
-        "German": {"hallo", "flug", "gepack", "danke", "erstattung", "umbuchung", "storniert", "ich", "mein", "meine"},
+        "French": {"bonjour", "vol", "bagage", "merci", "remboursement", "reservation", "annule", "je", "mon", "ma", "pouvez", "fournir", "details"},
+        "German": {"hallo", "flug", "gepack", "danke", "erstattung", "umbuchung", "storniert", "ich", "mein", "meine", "konnen", "weitere", "einzelheiten", "nennen", "wie", "hoch", "meinen", "fur"},
     }
     scores = {language: len(words & vocabulary) for language, vocabulary in signals.items()}
     best_language, best_score = max(scores.items(), key=lambda item: item[1])
@@ -37,6 +37,15 @@ class ConversationService:
         prompt = self.prompt_builder.build(config.context, config.guardrails, config.content, config.language, airline_name, intent_name, content, history)
         result = self.provider.complete(prompt)
         conversation.language = detect_language(content)
+        language_detector = getattr(self.provider, "detect_language", None)
+        if callable(language_detector):
+            try:
+                detected = language_detector(content, history)
+                if detected:
+                    conversation.language = detected
+            except Exception:
+                # Language detection must never make an otherwise valid reply fail.
+                pass
         user_message = Message(conversation_id=conversation.id, role="user", content=content)
         settings = get_settings()
         estimated_cost = result.input_tokens * settings.input_price_per_token + result.output_tokens * settings.output_price_per_token

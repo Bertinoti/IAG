@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-const api = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const api = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000").replace(/\/$/, "");
 export default function ChatPage() {
   const [airlines, setAirlines] = useState<any[]>([]),
     [intents, setIntents] = useState<any[]>([]),

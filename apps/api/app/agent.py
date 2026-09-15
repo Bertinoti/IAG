@@ -17,10 +17,28 @@ class AIProvider:
     def complete(self, prompt: str) -> AIResult:
         raise NotImplementedError
 
+    def detect_language(self, message: str, history: str = "") -> str | None:
+        return None
+
 class ProviderError(RuntimeError):
     pass
 
 class OpenAIProvider(AIProvider):
+    def detect_language(self, message: str, history: str = "") -> str | None:
+        prompt = (
+            "Identify the language being used by the customer in this conversation, prioritizing the "
+            "latest user message and using earlier messages only to resolve ambiguity. Reply with "
+            "exactly one common English language name (for example "
+            "Japanese, Italian, Arabic, Hindi, English, or Portuguese). If it cannot be identified, "
+            "reply Other. Do not add punctuation or explanation.\n"
+            f"Conversation history:\n{history}\nLatest user message:\n{message}"
+        )
+        try:
+            label = self.complete(prompt).content.strip().strip(".`'\"")
+        except ProviderError:
+            return None
+        return label if 1 <= len(label) <= 20 and all(character.isalpha() or character in " -" for character in label) else None
+
     def complete(self, prompt: str) -> AIResult:
         settings = get_settings()
         if not settings.openai_api_key:

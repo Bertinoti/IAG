@@ -1,8 +1,8 @@
-﻿"use client";
+"use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getSession } from "../../lib/api";
-const api = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const api = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000").replace(/\/$/, "");
 export default function ConversationsPage() {
   const [items, setItems] = useState<any[]>([]); const [page, setPage] = useState(1); const [total, setTotal] = useState(0);
   const [airlines, setAirlines] = useState<any[]>([]); const [intents, setIntents] = useState<any[]>([]);

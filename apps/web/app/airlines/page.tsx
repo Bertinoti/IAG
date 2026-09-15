@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { getSession } from "../../lib/api";
 
-const api = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const api = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000").replace(/\/$/, "");
 type Item = {
   airline: { id: number; name: string; code: string };
   configuration: {

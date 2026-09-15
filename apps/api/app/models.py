@@ -56,7 +56,7 @@ class Conversation(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     airline_id: Mapped[int] = mapped_column(ForeignKey("airlines.id"))
     intent_id: Mapped[int] = mapped_column(ForeignKey("intents.id"))
-    language: Mapped[str] = mapped_column(String(20), default="unknown")
+    language: Mapped[str] = mapped_column(String(64), default="unknown")
     started_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
