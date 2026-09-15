@@ -62,7 +62,7 @@ Login sets a signed HttpOnly, SameSite=Lax cookie containing an admin id and exp
 `pnpm test` runs the Gherkin/Cucumber-JS business scenarios. API pytest is run separately because the API is Python rather than a TurboRepo package:
 
 ```powershell
-cd C:\Users\jeffe\Documents\GitHub\IAG\apps\api
+cd C:\Users\YourFilePath\IAG\apps\api
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 python -m pytest -q
