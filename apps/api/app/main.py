@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import logging
 import os
 
 from fastapi import Depends, FastAPI
@@ -7,6 +8,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from .auth import get_current_admin, seed_admin
 from .models import User
 from .routers import agent_config, airline_config, auth, catalog, conversations, dashboard
+
+
+def configure_logging() -> None:
+    formatter = logging.Formatter(
+        fmt="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+    for name in ("uvicorn", "uvicorn.error", "uvicorn.access"):
+        logger = logging.getLogger(name)
+        for handler in logger.handlers:
+            handler.setFormatter(formatter)
+
+
+configure_logging()
 
 
 @asynccontextmanager
