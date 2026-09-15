@@ -139,7 +139,7 @@ When(
   "the administrator submits valid credentials",
   async function (this: World) {
     await this.page.getByLabel("Email").fill("admin@example.com");
-    await this.page.getByLabel("Password").fill("local-password");
+    await this.page.getByLabel("Password").fill("ChangeMe123!");
     await this.page.getByRole("button", { name: "Sign in" }).click();
   },
 );

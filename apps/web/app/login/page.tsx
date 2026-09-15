@@ -52,10 +52,11 @@ export default function LoginPage() {
             className="mt-2 w-full rounded-xl border bg-slate-50 px-3 py-2.5 transition placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:outline-none"
           />
         </label>
-        <label className="block text-sm font-medium">
-          Password
+        <div className="block text-sm font-medium">
+          <label htmlFor="password">Password</label>
           <span className="relative mt-2 block">
             <input
+              id="password"
               required
               type={showPassword ? "text" : "password"}
               value={password}
@@ -64,7 +65,7 @@ export default function LoginPage() {
             />
             <button
               type="button"
-              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-label={showPassword ? "Hide secret" : "Show secret"}
               aria-pressed={showPassword}
               onClick={() => setShowPassword((visible) => !visible)}
               className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-slate-500 hover:text-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500"
@@ -74,7 +75,7 @@ export default function LoginPage() {
               </svg>
             </button>
           </span>
-        </label>
+        </div>
         {error && (
           <p role="alert" className="text-sm text-red-700">
             {error}
