@@ -1,58 +1,19 @@
-"use client";
+﻿"use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getSession } from "../../lib/api";
 const api = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 export default function ConversationsPage() {
-  const [items, setItems] = useState<any[]>([]);
-  useEffect(() => {
-    getSession().then((u) => {
-      if (!u) location.href = "/login";
-      else
-        fetch(`${api}/api/conversations`, { credentials: "include" })
-          .then((r) => r.json())
-          .then((d) => setItems(d.items));
-    });
-  }, []);
-  return (
-    <main className="mx-auto max-w-5xl p-8">
-      <h1 className="text-3xl font-semibold">Conversations</h1>
-      <div className="mt-6 overflow-x-auto rounded border bg-white">
-        <table className="w-full text-left">
-          <thead>
-            <tr className="border-b">
-              <th className="p-3">ID</th>
-              <th className="p-3">Airline</th>
-              <th className="p-3">Intent</th>
-              <th className="p-3">Messages</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.length ? (
-              items.map((c) => (
-                <tr key={c.id} className="border-b">
-                  <td className="p-3">
-                    <Link className="underline" href={`/conversations/${c.id}`}>
-                      {c.id}
-                    </Link>
-                  </td>
-                  <td className="p-3">
-                    {c.airline_code || c.airline_name || "—"}
-                  </td>
-                  <td className="p-3 capitalize">{c.intent_name || "—"}</td>
-                  <td className="p-3">{c.message_count}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td className="p-6 text-slate-500" colSpan={4}>
-                  No conversations yet.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </main>
-  );
+  const [items, setItems] = useState<any[]>([]); const [page, setPage] = useState(1); const [total, setTotal] = useState(0);
+  const [airlines, setAirlines] = useState<any[]>([]); const [intents, setIntents] = useState<any[]>([]);
+  const [airlineId, setAirlineId] = useState(""); const [intentId, setIntentId] = useState(""); const [language, setLanguage] = useState("");
+  const pageSize = 20;
+  useEffect(() => { getSession().then((u) => { if (!u) location.href = "/login"; else Promise.all([fetch(`${api}/api/airlines`).then((r) => r.json()), fetch(`${api}/api/intents`).then((r) => r.json())]).then(([a, i]) => { setAirlines(a.items ?? []); setIntents(i.items ?? []); }); }); }, []);
+  useEffect(() => { getSession().then((u) => { if (u) { const q = new URLSearchParams({ page: String(page), page_size: String(pageSize) }); if (airlineId) q.set("airline_id", airlineId); if (intentId) q.set("intent_id", intentId); if (language) q.set("language", language); fetch(`${api}/api/conversations?${q}`, { credentials: "include" }).then((r) => r.json()).then((d) => { setItems(d.items ?? []); setTotal(d.total ?? 0); }); } }); }, [page, airlineId, intentId, language]);
+  const reset = (setter: (value: string) => void) => (event: React.ChangeEvent<HTMLSelectElement>) => { setter(event.target.value); setPage(1); };
+  return <main className="mx-auto max-w-5xl p-8"><h1 className="text-3xl font-semibold">Conversations</h1>
+    <div className="mt-6 grid gap-3 rounded border bg-white p-4 sm:grid-cols-3"><select aria-label="Filter by airline" value={airlineId} onChange={reset(setAirlineId)} className="rounded border p-2"><option value="">All airlines</option>{airlines.map((a) => <option key={a.id} value={a.id}>{a.code} · {a.name}</option>)}</select><select aria-label="Filter by intent" value={intentId} onChange={reset(setIntentId)} className="rounded border p-2"><option value="">All intents</option>{intents.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}</select><select aria-label="Filter by language" value={language} onChange={reset(setLanguage)} className="rounded border p-2"><option value="">All languages</option>{["English", "Portuguese", "Spanish", "French", "German"].map((l) => <option key={l}>{l}</option>)}</select></div>
+    <div className="mt-6 overflow-x-auto rounded border bg-white"><table className="w-full text-left"><thead><tr className="border-b"><th className="p-3">ID</th><th className="p-3">Airline</th><th className="p-3">Intent</th><th className="p-3">Language</th><th className="p-3">Messages</th></tr></thead><tbody>{items.length ? items.map((c) => <tr key={c.id} className="border-b"><td className="p-3"><Link className="underline" href={`/conversations/${c.id}`}>{c.id}</Link></td><td className="p-3">{c.airline_code || c.airline_name || "—"}</td><td className="p-3 capitalize">{c.intent_name || "—"}</td><td className="p-3">{c.language || "Other"}</td><td className="p-3">{c.message_count}</td></tr>) : <tr><td className="p-6 text-slate-500" colSpan={5}>No conversations yet.</td></tr>}</tbody></table></div>
+    {total > pageSize && <div className="mt-4 flex items-center justify-between text-sm text-slate-600"><span>Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, total)} of {total}</span><div className="flex gap-2"><button className="rounded border px-3 py-1 disabled:opacity-40" disabled={page === 1} onClick={() => setPage((p) => p - 1)}>Previous</button><button className="rounded border px-3 py-1 disabled:opacity-40" disabled={page * pageSize >= total} onClick={() => setPage((p) => p + 1)}>Next</button></div></div>}
+  </main>;
 }

@@ -1,4 +1,5 @@
-﻿import unicodedata
+import re
+import unicodedata
 
 from sqlalchemy import select
 
@@ -9,15 +10,20 @@ from .config import get_settings
 
 
 def detect_language(message: str) -> str:
-    lowered = unicodedata.normalize("NFKD", message.lower()).encode("ascii", "ignore").decode()
-    if any(word in lowered for word in ("o que", "como", "bagagem", "voo", "ola", "obrigado", "reembolso", "remarcacao", "reserva")):
-        return "Portuguese"
-    if any(word in lowered for word in ("equipaje", "vuelo", "hola", "gracias", "reembolso", "cambio de reserva", "cancelado")):
-        return "Spanish"
-    if any(word in lowered for word in ("what", "how", "baggage", "flight", "hello", "thanks", "refund", "rebooking", "cancelled")):
-        return "English"
-    return "Other"
-
+    """Detect language using distinctive whole-word signals."""
+    normalized = unicodedata.normalize("NFKD", message.lower()).encode("ascii", "ignore").decode()
+    words = set(re.findall(r"[a-z]+", normalized))
+    signals = {
+        "Portuguese": {"voo", "bagagem", "obrigado", "obrigada", "remarcacao", "quero", "meu", "minha"},
+        "Spanish": {"vuelo", "equipaje", "gracias", "hola", "cambio", "quiero", "mi", "que"},
+        "English": {"what", "how", "baggage", "flight", "hello", "thanks", "refund", "rebooking", "cancelled", "want", "my", "can", "provide", "details", "please"},
+        "French": {"bonjour", "vol", "bagage", "merci", "remboursement", "reservation", "annule", "je", "mon", "ma"},
+        "German": {"hallo", "flug", "gepack", "danke", "erstattung", "umbuchung", "storniert", "ich", "mein", "meine"},
+    }
+    scores = {language: len(words & vocabulary) for language, vocabulary in signals.items()}
+    best_language, best_score = max(scores.items(), key=lambda item: item[1])
+    tied = [language for language, score in scores.items() if score == best_score]
+    return best_language if best_score > 0 and len(tied) == 1 else "Other"
 
 class ConversationService:
     def __init__(self, provider: AIProvider, prompt_builder: PromptBuilder | None = None):

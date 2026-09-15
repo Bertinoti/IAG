@@ -70,6 +70,7 @@ def get_current_admin(
 def seed_admin() -> None:
     from .database import Base, engine, SessionLocal
     from .models import Airline, AirlinePromptConfiguration, Intent
+    from .services import detect_language
 
     Base.metadata.create_all(engine)
     with engine.begin() as connection:
@@ -100,7 +101,7 @@ def seed_admin() -> None:
         prompt_data = {
             "BA": ("British Airways international support", "Use British Airways terminology and official policy tone.", "Focus on Heathrow operations, Avios, baggage and British Airways service policies."),
             "IB": ("Iberia customer care", "Use clear Iberia terminology and distinguish Iberia services from partner airlines.", "Focus on Madrid hub operations, Iberia Plus, baggage and Iberia travel policies."),
-            "VY": ("Vueling low-cost European travel support", "Be concise, practical and transparent about Vueling restrictions and fees. Never apply this rule to another airline or flight. Detect the user's language and translate the required VY8730 messages into the language of the latest user message. Use the conversation history to handle follow-up questions; do not repeat the initial options question after the customer has selected an option.", "Focus on Barcelona and European routes, fare bundles, baggage and Vueling policies. For Vueling flight VY8730 only: when the user asks about a cancellation, translate and return this source message in the user's latest language: 'Your flight is cancelled. We have two active options for your flight: a refund or rebooking.' If the customer explicitly chooses a refund or rebooking, acknowledge that choice, answer any payment question without inventing a price (explain that any applicable fare difference or fee must be confirmed for the booking), and translate and say in the user's latest language that they will receive an email confirming their choice. Complete the response without asking which option they prefer again. This instruction applies only to VY8730 operated by Vueling."),
+            "VY": ("Vueling low-cost European travel support", "Be concise, practical and transparent about Vueling restrictions and fees. Never apply this rule to another airline or flight. Detect the user's language and respond in the language of the latest user message. Use the conversation history to handle follow-up questions. For VY8730, once the customer chooses an option, do not repeat the initial options question and do not ask them to choose again.", "Focus on Barcelona and European routes, fare bundles, baggage and Vueling policies. Apply the following scripted flow only to Vueling flight VY8730: when the customer asks about its cancellation, translate this source message into the latest user language: 'Your flight is cancelled. We have two active options for your flight: a refund or rebooking.' When the latest message clearly chooses a refund, answer with a complete acknowledgement equivalent to: 'You chose a refund. Your request has been recorded. You will receive an email confirming your choice.' When the latest message clearly chooses rebooking, use the equivalent acknowledgement for rebooking and confirm that an email will arrive. Do not repeat the cancellation options, ask another preference question, or add fare or fee caveats unless the customer explicitly asks about cost. If cost is asked, explain that any applicable fare difference or fee must be confirmed for the booking without inventing a price. This instruction applies only to VY8730 operated by Vueling."),
             "EI": ("Aer Lingus travel support", "Use friendly Irish airline terminology and avoid promising exceptions.", "Focus on Dublin connectivity, transatlantic travel, baggage and Aer Lingus policies, including clear transatlantic connection guidance."),
             "LV": ("LEVEL long-haul low-cost support", "Explain included and optional services precisely for LEVEL fares.", "Focus on LEVEL long-haul routes, fare inclusions, baggage and onboard services."),
         }
@@ -108,7 +109,7 @@ def seed_admin() -> None:
             context, guardrails, content = prompt_data[airline.code]
             config = db.scalar(select(AirlinePromptConfiguration).where(AirlinePromptConfiguration.airline_id == airline.id))
             # Migrate the VY8730 follow-up rule once; preserve later admin edits.
-            needs_default = config is None or (airline.code == "VY" and "do not repeat the initial options question" not in config.guardrails) or (airline.code == "EI" and config.content == "Airline policies")
+            needs_default = config is None or (airline.code == "VY" and ("do not repeat the initial options question" not in config.guardrails or "You chose a refund" not in config.content)) or (airline.code == "EI" and config.content == "Airline policies")
             if config is None:
                 config = AirlinePromptConfiguration(airline_id=airline.id, context=context, guardrails=guardrails, content=content, language="Detect the user's language and respond in the same language. If the user changes language, always respond in the language of the latest message.")
                 db.add(config)
@@ -117,4 +118,15 @@ def seed_admin() -> None:
                 config.language = "Detect the user's language and respond in the same language. If the user changes language, always respond in the language of the latest message."
         for name in ["baggage", "check-in", "booking", "cancellation", "flight-status"]:
             if db.scalar(select(Intent).where(Intent.name == name)) is None: db.add(Intent(name=name))
+        # Keep historical dashboard data consistent with the current detector.
+        # The latest user message defines the conversation language.
+        from .models import Conversation, Message
+        for conversation in db.scalars(select(Conversation)).all():
+            latest_user_message = db.scalar(
+                select(Message)
+                .where(Message.conversation_id == conversation.id, Message.role == "user")
+                .order_by(Message.created_at.desc())
+            )
+            if latest_user_message:
+                conversation.language = detect_language(latest_user_message.content)
         db.commit()

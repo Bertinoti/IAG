@@ -6,7 +6,7 @@ Next.js owns browser routes, accessible UI state, and one REST client. FastAPI o
 
 ## Structure and data
 
-- `apps/web`: `/login`, `/dashboard`, `/agent`, and `/chat`.
+- `apps/web`: `/login`, `/dashboard`, `/agent`, `/airlines`, `/conversations`, `/conversations/:id`, and `/chat`.
 - `apps/api/app`: configuration, auth, SQLAlchemy models/database, routes, `PromptBuilder`, and `AIProvider`.
 - `packages/ui`: reusable React components and stories.
 - `e2e`: Gherkin features, Cucumber bindings, and Playwright tests.
@@ -15,11 +15,12 @@ FastAPI routes depend on application/provider boundaries; SQLAlchemy and AI adap
 
 ## Run locally
 
-Requirements: Node.js 22 or later and npm. Verify them in PowerShell:
+Requirements: Node.js 22 or later, pnpm 9.15.0, Python 3.12 or later, and Docker Desktop for the container workflow. Verify the JavaScript and Python runtimes in PowerShell:
 
 ```powershell
 node --version
 npm --version
+python --version
 ```
 
 Install the pinned pnpm version globally and verify it:
@@ -58,7 +59,7 @@ Variables include `NEXT_PUBLIC_API_URL`, `API_HOST`, `API_PORT`, `DATABASE_URL`,
 
 Login sets a signed HttpOnly, SameSite=Lax cookie containing an admin id and expiry; logout clears it and protected routes validate it. `/agent` persists the global Context, Guardrails, Content, and Language. `/airlines` stores the same prompt fields per airline, with the global configuration as fallback. `/chat` requires a seeded airline and fixed intent, persists messages and token/cost metrics, and supports one rating. `PromptBuilder` centralizes prompts; `AIProvider` is the only AI boundary. Estimated cost is an application metric, not provider billing.
 
-`pnpm test` runs the real Cucumber-JS business scenarios. API pytest is intentionally run separately because it is Python rather than a TurboRepo package:
+`pnpm test` runs the Gherkin/Cucumber-JS business scenarios. API pytest is run separately because the API is Python rather than a TurboRepo package:
 
 ```powershell
 cd C:\Users\jeffe\Documents\GitHub\IAG\apps\api
@@ -67,7 +68,7 @@ python -m pip install -r requirements.txt
 python -m pytest -q
 ```
 
-Run the other verification suites explicitly with `pnpm format`, `pnpm lint`, `pnpm typecheck`, `pnpm build`, `pnpm --filter @airline-ai/ui build-storybook`, and `pnpm --filter @airline-ai/e2e playwright`. Playwright starts the Next.js dev server automatically; its frontend journeys mock API responses and never call OpenAI. Automated AI tests inject a fake provider.
+Run the other verification suites explicitly with `pnpm format`, `pnpm lint`, `pnpm typecheck`, `pnpm build`, `pnpm --filter @airline-ai/e2e playwright`, and `pnpm --filter @airline-ai/ui build-storybook`. Playwright starts the Next.js dev server automatically; its frontend journeys mock API responses and never call OpenAI. Automated AI tests inject a fake provider.
 
 Verified: Docker image build/start, API health, web production build, web typecheck/lint, pytest (8 passed), Cucumber (4 scenarios, 13 steps passed), Playwright (2 passed), and Storybook build. Automated chat tests mock the AI provider.
 

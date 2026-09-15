@@ -23,8 +23,17 @@ def send_message(conversation_id: int, payload: MessagePayload, db: Session = De
     except ProviderError: raise HTTPException(503, "AI provider unavailable")
     return {"user_message": message_out(user_msg), "assistant_message": message_out(assistant_msg)}
 @router.get("")
-def list_conversations(page: int = 1, page_size: int = 20, _: User = Depends(get_current_admin), db: Session = Depends(get_db)) -> dict[str, object]:
-    page_size = min(max(page_size, 1), 100); total = db.scalar(select(func.count(Conversation.id))) or 0; items = db.scalars(select(Conversation).order_by(Conversation.updated_at.desc()).offset((page-1)*page_size).limit(page_size)).all(); airlines = {a.id: a for a in db.scalars(select(Airline)).all()}; intents = {i.id: i for i in db.scalars(select(Intent)).all()}; return {"items": [{"id": c.id, "airline_id": c.airline_id, "airline_code": airlines[c.airline_id].code if c.airline_id in airlines else "", "airline_name": airlines[c.airline_id].name if c.airline_id in airlines else "", "intent_id": c.intent_id, "intent_name": intents[c.intent_id].name if c.intent_id in intents else "", "started_at": c.started_at, "updated_at": c.updated_at, "message_count": db.scalar(select(func.count(Message.id)).where(Message.conversation_id == c.id)) or 0} for c in items], "page": page, "page_size": page_size, "total": total}
+def list_conversations(page: int = 1, page_size: int = 20, airline_id: int | None = None, intent_id: int | None = None, language: str | None = None, _: User = Depends(get_current_admin), db: Session = Depends(get_db)) -> dict[str, object]:
+    page_size = min(max(page_size, 1), 100)
+    filters = []
+    if airline_id is not None: filters.append(Conversation.airline_id == airline_id)
+    if intent_id is not None: filters.append(Conversation.intent_id == intent_id)
+    if language: filters.append(Conversation.language == language)
+    base = select(Conversation).where(*filters)
+    total = db.scalar(select(func.count(Conversation.id)).where(*filters)) or 0
+    items = db.scalars(base.order_by(Conversation.updated_at.desc()).offset((page - 1) * page_size).limit(page_size)).all()
+    airlines = {a.id: a for a in db.scalars(select(Airline)).all()}; intents = {i.id: i for i in db.scalars(select(Intent)).all()}
+    return {"items": [{"id": c.id, "airline_id": c.airline_id, "airline_code": airlines[c.airline_id].code if c.airline_id in airlines else "", "airline_name": airlines[c.airline_id].name if c.airline_id in airlines else "", "intent_id": c.intent_id, "intent_name": intents[c.intent_id].name if c.intent_id in intents else "", "language": c.language, "started_at": c.started_at, "updated_at": c.updated_at, "message_count": db.scalar(select(func.count(Message.id)).where(Message.conversation_id == c.id)) or 0} for c in items], "page": page, "page_size": page_size, "total": total}
 @router.get("/{conversation_id}")
 def conversation_detail(conversation_id: int, _: User = Depends(get_current_admin), db: Session = Depends(get_db)) -> dict[str, object]:
     c = db.get(Conversation, conversation_id)

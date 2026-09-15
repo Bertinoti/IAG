@@ -6,6 +6,8 @@ Repository: `C:\Users\jeffe\Documents\GitHub\IAG`.
 
 This is a small, explainable local demo for configuring and using an AI agent that answers airline questions. The public surface is `/chat`; the administrator backoffice contains `/login`, `/dashboard`, `/agent`, `/airlines`, `/conversations`, and conversation detail.
 
+The current implementation is suitable for portfolio and interview demonstration. It is not a production airline operations system: there are no live airline integrations, reservations, payments, or real customer accounts.
+
 ## Approved stack and boundaries
 
 Use TurboRepo/pnpm, Next.js/React/TypeScript, Tailwind CSS, Apache ECharts, Storybook, FastAPI/Python, Pydantic, SQLAlchemy 2.x, SQLite, OpenAI behind `AIProvider`/`OpenAIProvider`, pytest, Gherkin/Cucumber-JS, Playwright, Docker Compose, and GitHub Actions. Next.js calls FastAPI through the centralized REST client. The browser never calls OpenAI or stores credentials.
@@ -20,11 +22,13 @@ FastAPI routes translate HTTP and call application services. Services depend on 
 - Dashboard KPIs and charts are derived from persisted data. Estimated cost is calculated from stored token usage and configured prices; it is not provider billing data.
 - Pydantic validates request boundaries and errors use safe JSON envelopes without traces, secrets, hashes, or provider payloads.
 
+The implemented API areas are authentication, health, dashboard metrics, global agent configuration, per-airline configuration, seeded airlines and intents, conversations, messages, and conversation ratings. The per-airline configuration is an additive extension that preserves one active global configuration and does not introduce multiple agents.
+
 ## Testing and local operations
 
 pytest covers Python services, repositories, validation, auth, aggregation, and provider behavior. Gherkin/Cucumber-JS binds business scenarios. Playwright exercises browser journeys; its web server can start Next.js automatically and tests mock API responses. Storybook reviews reusable UI states.
 
-Use `pnpm install`, `pnpm dev`, `pnpm format`, `pnpm lint`, `pnpm typecheck`, and `pnpm build`. Run API tests with `cd apps/api; python -m pytest -q`. Docker uses `docker compose up --build` with a persistent SQLite volume. Never commit real `.env` files.
+Use `pnpm install`, `pnpm dev`, `pnpm format`, `pnpm lint`, `pnpm typecheck`, and `pnpm build`. Run business scenarios with `pnpm test` or `pnpm --filter @airline-ai/e2e bdd`; run API tests with `cd apps/api; python -m pytest -q`; run browser journeys with `pnpm --filter @airline-ai/e2e playwright`; and build Storybook with `pnpm --filter @airline-ai/ui build-storybook`. Docker uses `docker compose up --build` with a persistent SQLite volume. Never commit real `.env` files.
 
 ## Explicit exclusions and limitations
 

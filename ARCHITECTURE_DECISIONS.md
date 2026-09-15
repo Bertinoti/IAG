@@ -1,6 +1,6 @@
 # Airline AI Agent V2 — Architecture and API Decision Record
 
-Status: approved for implementation planning; no application code is included.
+Status: implemented and verified against the current local project.
 
 This record resolves the decisions requested after discovery and is constrained by `TECHNICAL_SPECIFICATION_V2.md`. The user’s request is treated as project-owner approval to record these choices.
 
@@ -88,4 +88,8 @@ pytest owns Python behavior and HTTP/API contracts. Repository tests use isolate
 - [x] SQLAlchemy transaction/unit-of-work boundaries defined.
 - [x] Pydantic validation and safe error envelope defined.
 - [x] pytest, Cucumber-JS/Gherkin, Playwright, Storybook, and AI mocking boundaries defined.
-- [ ] Architecture/API review of exact endpoint paths, identifier/timestamp serialization, and cookie deployment values before Phase 3 implementation.
+- [x] Architecture/API review of exact endpoint paths, identifier/timestamp serialization, and cookie deployment values completed for the local demo.
+
+## Implementation alignment
+
+The implementation includes the approved global `AgentConfiguration` and an additional airline-specific configuration route for the seeded airlines. The airline-specific configuration is a documented extension: it falls back to the global configuration and does not represent multiple agents. The implementation also confirms that users select both airline and fixed intent before creating a conversation.

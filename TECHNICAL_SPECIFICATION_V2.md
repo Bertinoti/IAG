@@ -1,6 +1,6 @@
 # Airline AI Agent — Technical Specification V2
 
-**Status:** Draft for approval  
+**Status:** Implemented local portfolio demo  
 **Version:** 2.0  
 **Purpose:** Technical specification for a local demo and portfolio project
 
@@ -51,7 +51,7 @@ Intents are defined in a fixed, seeded list. The initial list is:
 - cancellation;
 - flight-status.
 
-The intent associated with a conversation must come from this fixed list. V2 does not yet prescribe whether it is selected by the user or assigned by the application; that interaction decision must be approved before the chat flow is implemented. Automatic open-ended intent discovery is outside this version.
+The intent associated with a conversation comes from this fixed list and is selected explicitly by the user before a conversation is created. Automatic open-ended intent discovery is outside this version.
 
 ### Conversation rating
 
@@ -195,6 +195,8 @@ airline-ai-agent/
 
 Only one active agent configuration is required in V2.
 
+The implementation also supports an optional airline-specific prompt configuration for the seeded airlines. When an airline-specific configuration is absent, the global `AgentConfiguration` is used as the fallback. This is a deliberate V2 implementation extension and does not create additional agents.
+
 ### Airline
 
 - `id`
@@ -319,7 +321,7 @@ Return response to the chat UI
 
 OpenAI calls in automated tests must be mocked.
 
-The intent assignment interaction remains pending approval: the implementation must either add an intent selector using the fixed list or assign an intent through an explicitly approved application rule. It must not invent open-ended classification.
+The user selects an intent from the seeded fixed list before creating a conversation. The API validates that the selected intent exists and never infers or discovers open-ended intents.
 
 ## 12. Dashboard
 
@@ -484,7 +486,7 @@ The V2 project is accepted when:
 - protected routes reject unauthenticated access;
 - the dashboard initially shows zero or empty data correctly;
 - the administrator can save the four agent configuration fields;
-- the chat requires airline selection, and the approved fixed-intent assignment flow is implemented;
+- the chat requires airline selection and explicit selection of a seeded fixed intent;
 - a question produces an OpenAI-backed response through FastAPI;
 - the conversation, messages, token usage, and estimated cost are persisted;
 - the conversation can be rated positively or negatively;

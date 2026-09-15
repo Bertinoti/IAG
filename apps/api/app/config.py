@@ -1,5 +1,8 @@
 from functools import lru_cache
 import os
+from pathlib import Path
+
+from dotenv import load_dotenv
 
 from pydantic import BaseModel, Field
 
@@ -22,6 +25,10 @@ class Settings(BaseModel):
 
 @lru_cache
 def get_settings() -> Settings:
+    # Load the API-local .env for direct uvicorn runs. Docker still supplies
+    # the same values through compose's env_file, and explicit environment
+    # variables take precedence (override=False).
+    load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=False)
     return Settings(
         host=os.getenv("API_HOST", "0.0.0.0"),
         port=int(os.getenv("API_PORT", "8000")),

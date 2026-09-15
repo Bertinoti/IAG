@@ -61,7 +61,7 @@ export function Chart({
             ? items.map((i) => ({ name: i.label, value: i.value }))
             : items.map((i) => i.value),
         radius: type === "pie" ? ["38%", "68%"] : undefined,
-        center: type === "pie" ? ["50%", "56%"] : undefined,
+        center: type === "pie" ? ["50%", "47%"] : undefined,
         label:
           type === "pie"
             ? {

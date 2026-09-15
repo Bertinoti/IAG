@@ -1,12 +1,12 @@
 # Airline AI Agent — Discovery Report
 
-Status: discovery only. No application code exists yet, and no production code was written for this report.
+Status: historical discovery record. The target design in this report was implemented locally; see `README.md`, `AI_CONTEXT.md`, and `TECHNICAL_SPECIFICATION_V2.md` for the current state.
 
 ## Current workspace
 
-The workspace contains the project guidance files (`TECHNICAL_SPECIFICATION_V2.md`, `AI_CONTEXT.md`, `PROJECT_PROMPT.md`, `PROMPTS.md`), two agent instruction files, and the frontend/backend skill files. It is not currently a Git repository (`git status` reports “not a git repository”). The specified application directories and runtime files are absent: `apps/web`, `apps/api`, `packages/ui`, `e2e`, `docker`, `.github/workflows`, `docker-compose.yml`, `turbo.json`, `package.json`, and `README.md` do not yet exist.
+The workspace now contains the implementation described by this report: `apps/web`, `apps/api`, `packages/ui`, `e2e`, `.github/workflows`, `docker-compose.yml`, `turbo.json`, `package.json`, and the project documentation. This file remains as a record of the original discovery and planning decisions rather than a live implementation status report.
 
-This report therefore records the approved target design separately from the present filesystem state.
+This report therefore records the approved target design and the decisions that preceded implementation.
 
 ## 1. TurboRepo structure
 
@@ -69,59 +69,59 @@ Relationships: each conversation references one airline and one fixed intent; a 
 
 The approved authentication behavior is administrator email/password login and logout, secure password hashing, protected backoffice routes/APIs, backend-only OpenAI credentials, and no secrets or password material returned to the frontend. Public registration, social login, password reset, email verification, multiple roles, and complex RBAC are explicitly out of scope.
 
-The exact session mechanism remains unresolved and must be approved during architecture phase. The specification requires a local-demo-appropriate mechanism that does not expose credentials in browser storage, but it does not choose cookie/session semantics or add a session entity. **Assumption/recommendation for approval:** use an HttpOnly, Secure, explicitly SameSite cookie carrying an opaque or signed session identifier, with server-side validation on protected requests; define expiry, logout invalidation, local `Secure` behavior, CSRF posture, and whether session persistence is in SQLite before implementation. Do not implement until this decision is recorded in `AI_CONTEXT.md`.
+The implemented session mechanism is a signed, finite-lived HttpOnly cookie with `SameSite=Lax`; `Secure` is enabled for production deployment and disabled for local HTTP development. Logout clears the cookie. This deliberately avoids browser storage and does not introduce a session table for the local demo.
 
 ## 5. REST resource and route plan
 
-The specification requires documented FastAPI REST resources; exact names and schemas are a pre-implementation deliverable. The following is the proposed route plan, subject to architecture/API approval:
+The following route plan is the implemented local API surface. DTOs and validation live at the FastAPI boundary; the frontend consumes it through one centralized REST client.
 
-| Area                | Proposed routes                                                                                                        | Purpose                                                                         |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| Authentication      | `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/session`                                               | establish, end, and inspect the admin session                                   |
-| Dashboard           | `GET /api/dashboard?range=7d                                                                                           | 30d                                                                             | all` | KPI aggregates and four chart series |
-| Agent configuration | `GET /api/agent-config`, `PUT /api/agent-config`                                                                       | retrieve and save the single configuration                                      |
-| Airlines            | `GET /api/airlines`                                                                                                    | fixed chat selector data                                                        |
-| Intents             | `GET /api/intents`                                                                                                     | seeded fixed-intent selector data                                               |
-| Conversations       | `POST /api/conversations`, `GET /api/conversations`, `GET /api/conversations/{id}`                                     | create, paginate/filter table, inspect history and metadata                     |
-| Messages            | `POST /api/conversations/{id}/messages`, `GET /api/conversations/{id}/messages` (if needed by approved response shape) | send a user message and return/persist the assistant response; retrieve history |
-| Ratings             | `PUT /api/conversations/{id}/rating` (or approved equivalent)                                                          | create/replace the one positive/negative rating                                 |
+| Area                | Implemented routes                                                                 | Purpose                                                                         |
+| ------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Authentication      | `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/session`           | establish, end, and inspect the admin session                                   |
+| Dashboard           | `GET /api/dashboard?range=7d                                                       | 30d                                                                             | all` | KPI aggregates and four chart series |
+| Agent configuration | `GET /api/agent-config`, `PUT /api/agent-config`                                   | retrieve and save the single configuration                                      |
+| Airlines            | `GET /api/airlines`                                                                | fixed chat selector data                                                        |
+| Intents             | `GET /api/intents`                                                                 | seeded fixed-intent selector data                                               |
+| Conversations       | `POST /api/conversations`, `GET /api/conversations`, `GET /api/conversations/{id}` | create, paginate/filter table, inspect history and metadata                     |
+| Messages            | `POST /api/conversations/{id}/messages`, `GET /api/conversations/{id}/messages`    | send a user message and return/persist the assistant response; retrieve history |
+| Ratings             | `PUT /api/conversations/{id}/rating`                                               | create/replace the one positive/negative rating                                 |
 
-The chat create request must include selected `airline_id` and the approved fixed-intent assignment. Request validation is Pydantic-backed; errors need one documented safe format; pagination and dashboard filters must be explicit. The exact endpoint names, DTOs, status codes, and rating idempotency semantics remain an architecture-phase approval item.
+The chat create request includes the selected `airline_id` and fixed `intent_id`. The user selects both values; the API does not infer or invent intents. Request validation is Pydantic-backed and errors use a safe JSON envelope. The current implementation also exposes `/api/airline-config` for optional per-airline prompt fields with global agent configuration fallback.
 
 ## 6. Docker Compose and local development
 
 `docker compose up --build` must start a frontend service and a FastAPI backend service. SQLite remains file-based; Compose must mount a persistent volume for the SQLite file and does not need a database container. Secrets are environment variables, with frontend/backend `.env.example` files and real `.env` files excluded from Git. The web service calls the API over the Compose network; OpenAI access occurs only in the API container.
 
-Without Docker, the documented path is `pnpm install` followed by `pnpm dev`, orchestrated through TurboRepo and pnpm scripts. Foundation work must add Dockerfiles, workspace scripts, environment validation, health endpoint, lint/format/type-check/test commands, and CI workflow wiring. AWS deployment is not part of V2; container boundaries and repository isolation preserve future readiness.
+Without Docker, the documented path is `pnpm install` followed by `pnpm dev`, orchestrated through TurboRepo and pnpm scripts. Dockerfiles, workspace scripts, environment validation, health endpoint, lint/format/type-check/test commands, and CI workflow wiring are implemented. AWS deployment is not part of V2; container boundaries and repository isolation preserve future readiness.
 
 ## 7. Test and component boundaries
 
 - **pytest:** Python domain/application services, repositories, `PromptBuilder`, authentication, Pydantic validation, FastAPI endpoints, dashboard aggregations, and OpenAI-provider behavior. OpenAI requests are always mocked.
 - **Gherkin/Cucumber-JS:** business-readable scenarios in `e2e/features`; TypeScript step definitions in `e2e/steps`; shared setup/world in `e2e/support`. Scenarios cover admin login/dashboard, configuration save, airline plus fixed intent selection, question/response, rating, and conversation inspection.
 - **Playwright:** real browser journeys against running Next.js/FastAPI services, including login, configuration, chat, rating, and conversation inspection. It verifies route protection and visible UI states rather than replacing pytest unit coverage.
-- **Storybook:** component-level development and review for reusable UI in `packages/ui` and web-shared components. Minimum planned stories: Button, Input, MetricCard, MessageBubble, and ChatWidget.
+- **Storybook:** component-level development and review for reusable UI in `packages/ui` and web-shared components. The current stories cover the shared components used by the demo.
 
 ## 8. Phased implementation plan
 
-1. **Discovery:** this report and repository inspection; stop here.
-2. **Architecture/API approval:** decide session/cookie semantics, fixed-intent interaction, dependency direction, DTOs, transactions, errors, and mocking strategy; document decisions.
+1. **Discovery:** repository inspection and target design recorded in this report.
+2. **Architecture/API approval:** session/cookie semantics, fixed-intent interaction, dependency direction, DTOs, transactions, errors, and mocking strategy documented in `ARCHITECTURE_DECISIONS.md`.
 3. **Technical foundation:** TurboRepo/pnpm, Next.js, FastAPI, SQLAlchemy/SQLite, shared UI, e2e scaffolding, Docker, environment validation, scripts, README, health endpoint.
-4. **Authentication/backoffice shell:** seeded admin, secure hashing, approved session, login/logout, protected APIs/routes, validation and pytest coverage.
-5. **Agent/chat/persistence/dashboard workflows:** configuration and `PromptBuilder`; seeded airlines/intents; approved chat flow; persisted conversations/messages/tokens/cost; rating; paginated inspection; dashboard KPIs, filters, ECharts, empty states; mocked AI tests.
-6. **Quality layer:** Storybook, Gherkin/Cucumber, Playwright, responsive/accessibility review, contract synchronization, full checks.
-7. **Documentation/handoff:** update README, context, agents, skills to actual behavior; record limitations and verification; no new functionality.
+4. **Authentication/backoffice shell:** seeded admin, secure hashing, signed cookie session, login/logout, protected APIs/routes, validation, and pytest coverage.
+5. **Agent/chat/persistence/dashboard workflows:** configuration and `PromptBuilder`; seeded airlines/intents; explicit chat selection; persisted conversations/messages/tokens/cost; rating; conversation inspection; dashboard KPIs and charts; mocked AI tests.
+6. **Quality layer:** Storybook, Gherkin/Cucumber, Playwright, responsive/accessibility review, contract synchronization, and full checks.
+7. **Documentation/handoff:** README, context, agents, skills, specification, and decision records updated to actual behavior.
 
 Each phase stops at its stated deliverable. Later-phase functionality must not be implemented early.
 
 ## 9. Risks and explicit limitations
 
-- Session mechanism, cookie flags, expiry/revocation, CSRF strategy, and session persistence are unresolved and can affect schema, middleware, and tests.
-- Fixed-intent interaction is explicitly pending: user selector versus an approved application assignment rule. Open-ended or automatic classification is prohibited.
-- Exact REST names, DTOs, status codes, pagination contract, and rating update semantics are not yet approved.
+- The signed cookie is appropriate for this local demo; production cross-site deployment would require a fresh CSRF/CORS, key rotation, revocation, and session-storage review.
+- Fixed-intent interaction is explicit: the user selects a seeded airline and intent. Open-ended or automatic classification is prohibited.
+- The implemented REST surface and DTO behavior are documented in the API code and README; they remain local-demo contracts rather than production airline integration contracts.
 - SQLite is suitable for a local demo, not a multi-instance production deployment; AWS infrastructure and managed database migration are future work.
 - OpenAI availability, latency, quota, model pricing, and provider failures require safe mapping and mocks; estimated cost is only an application metric.
 - Seed data is intentionally minimal, so a new installation has empty conversation/dashboard states.
 - No real airline, flight, reservation, payment, or external operational integration exists in V2.
 - No RAG/vector store, document upload, Redis, queues, WebSockets, Kubernetes, or social authentication is allowed.
-- The current workspace has no implementation, package manifests, Git metadata, or runnable test/Docker configuration, so bootability and test results cannot yet be verified.
-- **Assumptions:** the `/api` prefix and route names in section 5, `pnpm-workspace.yaml`, and opaque-cookie recommendation are planning proposals only and require architecture approval before coding.
+- The current implementation is intentionally a local portfolio demo. It has no real airline operational integration and should not be presented as a production booking or support platform.
+- **Historical assumptions resolved:** the `/api` prefix, pnpm workspace, explicit fixed-intent selection, and signed-cookie approach were approved and implemented.
